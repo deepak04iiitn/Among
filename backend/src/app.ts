@@ -29,6 +29,8 @@ import {
 } from './modules/moderation/moderation.routes';
 import { notificationsRouter } from './modules/notifications/notification.routes';
 import { adminAnalyticsRouter, adminConfigRouter } from './modules/admin/adminAnalytics.routes';
+import { analyticsMiddleware } from './modules/analytics/analytics.middleware';
+import { analyticsRouter }     from './modules/analytics/analytics.routes';
 
 export function createApp(): express.Application {
   const app = express();
@@ -73,6 +75,9 @@ export function createApp(): express.Application {
   // ─── Global sanitization ──────────────────────────────────────────────────
   app.use(sanitizeBody);
 
+  // ─── Analytics middleware (fire-and-forget, after response) ──────────────
+  app.use(analyticsMiddleware);
+
   // ─── Health check ─────────────────────────────────────────────────────────
   app.get('/health', (_req: Request, res: Response) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -93,6 +98,7 @@ export function createApp(): express.Application {
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/admin/analytics', adminAnalyticsRouter);
   app.use('/api/admin/config', adminConfigRouter);
+  app.use('/api/analytics', analyticsRouter);
 
   // ─── 404 handler ─────────────────────────────────────────────────────────
   app.use((_req: Request, res: Response) => {
