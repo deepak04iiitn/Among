@@ -27,6 +27,9 @@ const mockApi = reactionsApi as jest.Mocked<typeof reactionsApi>;
 
 // ─── Store factory ────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDispatch = (action: any) => any;
+
 function makeStore() {
   return configureStore({ reducer: { reactions: reactionsReducer } });
 }
@@ -60,7 +63,7 @@ describe('setReactionThunk', () => {
     mockApi.setReaction.mockReturnValue(apiPromise as any);
 
     const store = makeStore();
-    const thunkPromise = store.dispatch(setReactionThunk({
+    const thunkPromise = (store.dispatch as AnyDispatch)(setReactionThunk({
       postId: POST_ID,
       primaryReaction: PRIMARY_REACTION_IDS.CURRENT,
     }));
@@ -80,7 +83,7 @@ describe('setReactionThunk', () => {
     );
 
     const store = makeStore();
-    await store.dispatch(setReactionThunk({
+    await (store.dispatch as AnyDispatch)(setReactionThunk({
       postId: POST_ID,
       primaryReaction: PRIMARY_REACTION_IDS.CURRENT,
     }));
@@ -99,7 +102,7 @@ describe('setReactionThunk', () => {
       payload: { postId: POST_ID, counts: { ...ZERO_COUNTS }, userReactions: [] },
     });
 
-    await store.dispatch(setReactionThunk({
+    await (store.dispatch as AnyDispatch)(setReactionThunk({
       postId: POST_ID,
       primaryReaction: PRIMARY_REACTION_IDS.CURRENT,
     }));
@@ -125,7 +128,7 @@ describe('setReactionThunk', () => {
       makeSetResponse(PRIMARY_REACTION_IDS.PAST, [], { ...ZERO_COUNTS, past: 1 }) as any
     );
 
-    await store.dispatch(setReactionThunk({
+    await (store.dispatch as AnyDispatch)(setReactionThunk({
       postId: POST_ID,
       primaryReaction: PRIMARY_REACTION_IDS.PAST,
     }));
@@ -141,7 +144,7 @@ describe('setReactionThunk', () => {
     );
 
     const store = makeStore();
-    await store.dispatch(setReactionThunk({
+    await (store.dispatch as AnyDispatch)(setReactionThunk({
       postId: POST_ID,
       secondaryReactions: [SECONDARY_REACTION_IDS.SAME, SECONDARY_REACTION_IDS.I_UNDERSTAND],
     }));
@@ -169,7 +172,7 @@ describe('removeReactionThunk', () => {
       },
     });
 
-    await store.dispatch(removeReactionThunk(POST_ID));
+    await (store.dispatch as AnyDispatch)(removeReactionThunk(POST_ID));
 
     expect(store.getState().reactions.userReactions[POST_ID]).toHaveLength(0);
     expect(store.getState().reactions.counts[POST_ID]?.current).toBe(0);
@@ -188,7 +191,7 @@ describe('removeReactionThunk', () => {
       },
     });
 
-    await store.dispatch(removeReactionThunk(POST_ID));
+    await (store.dispatch as AnyDispatch)(removeReactionThunk(POST_ID));
 
     // After rollback, reaction is restored
     expect(store.getState().reactions.counts[POST_ID]?.current).toBe(1);
@@ -205,7 +208,7 @@ describe('fetchReactionForPostThunk', () => {
     } as any);
 
     const store = makeStore();
-    await store.dispatch(fetchReactionForPostThunk(POST_ID));
+    await (store.dispatch as AnyDispatch)(fetchReactionForPostThunk(POST_ID));
 
     expect(store.getState().reactions.counts[POST_ID]?.same).toBe(12);
     expect(store.getState().reactions.userReactions[POST_ID]).toContain(SECONDARY_REACTION_IDS.SAME);
@@ -218,9 +221,10 @@ describe('fetchReactionForPostThunk', () => {
     } as any);
 
     const store = makeStore();
-    await store.dispatch(fetchReactionForPostThunk(POST_ID));
+    await (store.dispatch as AnyDispatch)(fetchReactionForPostThunk(POST_ID));
 
     expect(store.getState().reactions.counts[POST_ID]?.same).toBe(5);
     expect(store.getState().reactions.userReactions[POST_ID]).toHaveLength(0);
   });
 });
+

@@ -27,14 +27,18 @@ jest.mock('../../features/moderation/moderationThunks', () => ({
 
 const mockSubmitReportThunk = moderationThunks.submitReportThunk as jest.Mock;
 
-function makeStore(preloadedState?: Partial<{ moderation: ReturnType<typeof moderationReducer> }>) {
-  return configureStore({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function makeStore(preloadedState?: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return configureStore<any>({
     reducer: { moderation: moderationReducer },
-    preloadedState: preloadedState as any,
+    preloadedState,
   });
 }
 
-function renderModal(store: ReturnType<typeof makeStore>) {
+type TestStore = ReturnType<typeof makeStore>;
+
+function renderModal(store: TestStore) {
   return render(
     <Provider store={store}>
       <ReportModal />

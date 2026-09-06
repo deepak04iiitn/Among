@@ -26,6 +26,8 @@ function makeStore() {
 }
 
 type Store = ReturnType<typeof makeStore>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDispatch = (action: any) => any;
 
 // ─── Test data ────────────────────────────────────────────────────────────────
 
@@ -64,7 +66,7 @@ describe('requestMatchThunk', () => {
     });
 
     const store: Store = makeStore();
-    await store.dispatch(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
+    await (store.dispatch as AnyDispatch)(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
 
     expect(store.getState().conversations.matchingState).toBe('searching');
     expect(store.getState().conversations.matchingRequestId).toBe(CONV_ID);
@@ -78,7 +80,7 @@ describe('requestMatchThunk', () => {
     });
 
     const store: Store = makeStore();
-    await store.dispatch(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
+    await (store.dispatch as AnyDispatch)(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
 
     expect(store.getState().conversations.matchingState).toBe('matched');
     expect(store.getState().conversations.activeConversationId).toBe(CONV_ID);
@@ -90,7 +92,7 @@ describe('requestMatchThunk', () => {
     });
 
     const store: Store = makeStore();
-    await store.dispatch(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
+    await (store.dispatch as AnyDispatch)(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
 
     expect(store.getState().conversations.error).toBe('Daily limit reached');
   });
@@ -102,11 +104,11 @@ describe('cancelMatchRequestThunk', () => {
 
     const store: Store = makeStore();
     // First set to searching
-    await store.dispatch(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
+    await (store.dispatch as AnyDispatch)(requestMatchThunk({ contextCategoryId: 'loneliness' }) as ReturnType<typeof requestMatchThunk>);
     mockedApi.createMatchRequest.mockResolvedValueOnce({ matched: false, conversationId: CONV_ID, state: 'requested' });
 
     // Cancel
-    await store.dispatch(cancelMatchRequestThunk(CONV_ID) as ReturnType<typeof cancelMatchRequestThunk>);
+    await (store.dispatch as AnyDispatch)(cancelMatchRequestThunk(CONV_ID) as ReturnType<typeof cancelMatchRequestThunk>);
     expect(store.getState().conversations.matchingState).toBe('idle');
     expect(store.getState().conversations.matchingRequestId).toBeNull();
   });
@@ -117,7 +119,7 @@ describe('fetchConversationsThunk', () => {
     mockedApi.listConversations.mockResolvedValueOnce([makeConvListItem()]);
 
     const store: Store = makeStore();
-    await store.dispatch(fetchConversationsThunk() as ReturnType<typeof fetchConversationsThunk>);
+    await (store.dispatch as AnyDispatch)(fetchConversationsThunk() as ReturnType<typeof fetchConversationsThunk>);
 
     expect(store.getState().conversations.list).toHaveLength(1);
     expect(store.getState().conversations.list[0]?.id).toBe(CONV_ID);
@@ -133,7 +135,7 @@ describe('sendMessageThunk', () => {
     });
 
     const store: Store = makeStore();
-    await store.dispatch(sendMessageThunk(CONV_ID, 'Hello') as ReturnType<typeof sendMessageThunk>);
+    await (store.dispatch as AnyDispatch)(sendMessageThunk(CONV_ID, 'Hello') as ReturnType<typeof sendMessageThunk>);
 
     const messages = store.getState().conversations.messages[CONV_ID];
     expect(messages).toHaveLength(1);
@@ -148,7 +150,7 @@ describe('sendMessageThunk', () => {
     });
 
     const store: Store = makeStore();
-    await store.dispatch(sendMessageThunk(CONV_ID, 'Call +1 555 123 4567') as ReturnType<typeof sendMessageThunk>);
+    await (store.dispatch as AnyDispatch)(sendMessageThunk(CONV_ID, 'Call +1 555 123 4567') as ReturnType<typeof sendMessageThunk>);
 
     expect(store.getState().conversations.contactInfoWarning).toBe(true);
   });
@@ -161,7 +163,7 @@ describe('sendMessageThunk', () => {
     });
 
     const store: Store = makeStore();
-    await store.dispatch(sendMessageThunk(CONV_ID, 'Call +1 555 123 4567') as ReturnType<typeof sendMessageThunk>);
+    await (store.dispatch as AnyDispatch)(sendMessageThunk(CONV_ID, 'Call +1 555 123 4567') as ReturnType<typeof sendMessageThunk>);
 
     expect(store.getState().conversations.contactInfoWarning).toBe(false);
   });
@@ -175,7 +177,7 @@ describe('fetchMessagesThunk', () => {
     });
 
     const store: Store = makeStore();
-    await store.dispatch(fetchMessagesThunk(CONV_ID) as ReturnType<typeof fetchMessagesThunk>);
+    await (store.dispatch as AnyDispatch)(fetchMessagesThunk(CONV_ID) as ReturnType<typeof fetchMessagesThunk>);
 
     expect(store.getState().conversations.messages[CONV_ID]).toHaveLength(1);
   });
@@ -188,8 +190,8 @@ describe('fetchMessagesThunk', () => {
     mockedApi.getMessages.mockResolvedValueOnce({ messages: [second], nextCursor: null });
 
     const store: Store = makeStore();
-    await store.dispatch(fetchMessagesThunk(CONV_ID) as ReturnType<typeof fetchMessagesThunk>);
-    await store.dispatch(fetchMessagesThunk(CONV_ID, { cursor: 'cursor_1', append: true }) as ReturnType<typeof fetchMessagesThunk>);
+    await (store.dispatch as AnyDispatch)(fetchMessagesThunk(CONV_ID) as ReturnType<typeof fetchMessagesThunk>);
+    await (store.dispatch as AnyDispatch)(fetchMessagesThunk(CONV_ID, { cursor: 'cursor_1', append: true }) as ReturnType<typeof fetchMessagesThunk>);
 
     // append: true prepends older messages to the front
     const msgs = store.getState().conversations.messages[CONV_ID] ?? [];
@@ -200,14 +202,14 @@ describe('fetchMessagesThunk', () => {
 describe('socket event handlers', () => {
   it('handleMatchFoundThunk sets matched state', () => {
     const store: Store = makeStore();
-    store.dispatch(handleMatchFoundThunk(CONV_ID));
+    (store.dispatch as AnyDispatch)(handleMatchFoundThunk(CONV_ID));
     expect(store.getState().conversations.matchingState).toBe('matched');
     expect(store.getState().conversations.activeConversationId).toBe(CONV_ID);
   });
 
   it('handleMatchExpiredThunk sets no_match state', () => {
     const store: Store = makeStore();
-    store.dispatch(handleMatchExpiredThunk());
+    (store.dispatch as AnyDispatch)(handleMatchExpiredThunk());
     expect(store.getState().conversations.matchingState).toBe('no_match');
     expect(store.getState().conversations.matchingRequestId).toBeNull();
   });

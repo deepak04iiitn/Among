@@ -3,7 +3,7 @@
  */
 import { configureStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../store/rootReducer';
-import conversationsReducer, {
+import {
   conversationsLoading,
   conversationsLoaded,
   conversationsError,
@@ -67,6 +67,7 @@ const mockDetail = (overrides?: Partial<ConversationDetail>): ConversationDetail
   matchedAt:          '2026-01-01T00:01:00.000Z',
   startedAt:          '2026-01-01T00:02:00.000Z',
   expiresAt:          null,
+  lastActivityAt:     null,
   endedAt:            null,
   endReason:          null,
   feedbackSubmitted:  false,

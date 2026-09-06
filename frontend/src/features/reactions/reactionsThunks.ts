@@ -78,25 +78,25 @@ export const setReactionThunk = createAsyncThunk<
     // ─── API call ────────────────────────────────────────────────────────
     try {
       const result = await reactionsApi.setReaction(postId, {
-        primaryReaction,
-        secondaryReactions,
+        ...(primaryReaction !== undefined   ? { primaryReaction }   : {}),
+        ...(secondaryReactions !== undefined ? { secondaryReactions } : {}),
       });
 
       // Confirm with server-authoritative counts
       dispatch(reactionCountsLoaded({
         postId,
-        counts:        result.counts as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
+        counts:        result.counts as unknown as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
         userReactions: [
           ...(result.myReaction.primaryReaction ? [result.myReaction.primaryReaction] : []),
           ...result.myReaction.secondaryReactions,
         ],
       }));
-      dispatch(reactionConfirmed());
+      dispatch(reactionConfirmed()); return;
     } catch {
       // Rollback all optimistic updates using the pre-update state
       dispatch(reactionCountsLoaded({
         postId,
-        counts:        currentCounts as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
+        counts:        currentCounts as unknown as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
         userReactions: currentReacted,
       }));
       dispatch(reactionRolledBack({
@@ -131,15 +131,15 @@ export const removeReactionThunk = createAsyncThunk<
       const result = await reactionsApi.removeReaction(postId);
       dispatch(reactionCountsLoaded({
         postId,
-        counts:        result.counts as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
+        counts:        result.counts as unknown as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
         userReactions: [],
       }));
-      dispatch(reactionConfirmed());
+      dispatch(reactionConfirmed()); return;
     } catch {
       // Rollback — restore previous state entirely using authoritative snapshot
       dispatch(reactionCountsLoaded({
         postId,
-        counts:        currentCounts as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
+        counts:        currentCounts as unknown as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
         userReactions: currentReacted,
       }));
       // Clear pending without an additional count adjustment (counts already restored above)
@@ -162,7 +162,7 @@ export const fetchReactionForPostThunk = createAsyncThunk<
       const result = await reactionsApi.getReactions(postId);
       dispatch(reactionCountsLoaded({
         postId,
-        counts:        result.counts as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
+        counts:        result.counts as unknown as ReturnType<typeof reactionCountsLoaded>['payload']['counts'],
         userReactions: result.myReaction
           ? [
               ...(result.myReaction.primaryReaction ? [result.myReaction.primaryReaction] : []),
@@ -170,6 +170,7 @@ export const fetchReactionForPostThunk = createAsyncThunk<
             ]
           : [],
       }));
+      return;
     } catch {
       return rejectWithValue('Failed to load reactions.');
     }

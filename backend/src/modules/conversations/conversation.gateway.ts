@@ -6,7 +6,7 @@
  * No read receipts (prevents presence inference).
  */
 import type { Server as SocketServer, Socket } from 'socket.io';
-import { adminAuth } from '../../config/firebase.config';
+import { getFirebaseAuth } from '../../config/firebase';
 import { ConversationModel } from './conversation.model';
 import * as messageService from './message.service';
 import * as conversationService from './conversation.service';
@@ -30,7 +30,7 @@ async function authenticateSocket(socket: Socket): Promise<string | null> {
   try {
     const token = socket.handshake.auth?.token as string | undefined;
     if (!token) return null;
-    const decoded = await adminAuth.verifyIdToken(token);
+    const decoded = await getFirebaseAuth().verifyIdToken(token);
     // Look up internal accountId from Firebase UID
     const user = await UserModel.findOne({ firebaseUid: decoded.uid }).lean();
     return user ? String(user._id) : null;

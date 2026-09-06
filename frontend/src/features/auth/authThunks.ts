@@ -3,13 +3,15 @@
  *
  * Flow:
  *  1. User clicks "Sign in with Google"
- *  2. Firebase handles OAuth; client receives ID token
- *  3. ID token sent to /api/auth/session → AMONG account created/found
- *  4. Redux auth state updated with accountId and onboarding status
+ *  2. Firebase handles OAuth; client receives Firebase ID token (one-time use)
+ *  3. Firebase ID token sent to POST /api/auth/session
+ *  4. Backend verifies Firebase token, issues backend JWT pair (access + refresh)
+ *  5. Redux auth state updated; apiClient uses backend JWT on all subsequent calls
+ *  6. Access token silently refreshed via POST /api/auth/refresh before expiry
  *
- * Privacy: Firebase UID is only used in the auth layer. It is never
- * dispatched to the store's public-facing `user` object in any form
- * that routes or components can read.
+ * Privacy: Firebase UID is only used in the auth layer. It is never dispatched
+ * to the store's public-facing `user` object in any form that routes or
+ * components can read.
  */
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
@@ -17,6 +19,7 @@ import {
   authSuccess,
   authSignedOut,
   authError,
+  backendTokenRefreshed,
 } from './authSlice';
 import {
   identityLoaded,
@@ -29,16 +32,17 @@ import {
 } from '../../lib/firebaseClient';
 import {
   createSession,
+  refreshSession,
   getMe,
   extractAlias,
 } from '../../lib/authApi';
-import type { AppDispatch } from '../../store';
+import type { AppDispatch, RootState } from '../../store';
 
 // ─── Sign In ─────────────────────────────────────────────────────────────────
 
 /**
- * Sign in with Google via Firebase, then exchange the ID token for
- * an AMONG session. Dispatches `authSuccess` on completion.
+ * Sign in with Google via Firebase, then exchange the Firebase ID token
+ * for a backend JWT pair. Dispatches `authSuccess` on completion.
  */
 export const signInWithGoogleThunk = createAsyncThunk<
   void,
@@ -48,11 +52,11 @@ export const signInWithGoogleThunk = createAsyncThunk<
   dispatch(authLoading());
 
   try {
-    // Step 1: Firebase Google OAuth — get User object
+    // Step 1: Firebase Google OAuth — get Firebase ID token
     const firebaseUser = await signInWithGoogle();
     const idToken      = await firebaseUser.getIdToken();
 
-    // Step 2: Exchange for AMONG session
+    // Step 2: Exchange Firebase token for AMONG backend JWT pair (one-time)
     const session = await createSession(idToken);
 
     if (session.isBanned) {
@@ -70,6 +74,9 @@ export const signInWithGoogleThunk = createAsyncThunk<
           hasCompletedOnboarding: session.hasCompletedOnboarding,
         },
         idToken,
+        accessToken:  session.accessToken,
+        refreshToken: session.refreshToken,
+        expiresIn:    session.expiresIn,
       })
     );
 
@@ -109,10 +116,8 @@ export const signOutThunk = createAsyncThunk<
 // ─── Restore Session ─────────────────────────────────────────────────────────
 
 /**
- * Called on app load. Checks Firebase `onAuthStateChanged` for an
- * existing session and restores the Redux state if one is found.
- *
- * This thunk is dispatched from the `useAuth` hook on mount.
+ * Called on app load. Checks Firebase `onAuthStateChanged` for an existing
+ * session, re-exchanges for a fresh backend JWT pair, and restores Redux state.
  */
 export const restoreSessionThunk = createAsyncThunk<
   void,
@@ -122,7 +127,7 @@ export const restoreSessionThunk = createAsyncThunk<
   dispatch(authLoading());
 
   try {
-    // getIdToken() returns null if no Firebase user is signed in
+    // Get Firebase ID token — null if user is not signed in
     const idToken = await getIdToken();
 
     if (!idToken) {
@@ -130,7 +135,7 @@ export const restoreSessionThunk = createAsyncThunk<
       return;
     }
 
-    // Refresh the AMONG session
+    // Re-exchange Firebase token for a fresh backend JWT pair on every app load
     const session = await createSession(idToken);
 
     if (session.isBanned) {
@@ -148,6 +153,9 @@ export const restoreSessionThunk = createAsyncThunk<
           hasCompletedOnboarding: session.hasCompletedOnboarding,
         },
         idToken,
+        accessToken:  session.accessToken,
+        refreshToken: session.refreshToken,
+        expiresIn:    session.expiresIn,
       })
     );
 
@@ -160,7 +168,41 @@ export const restoreSessionThunk = createAsyncThunk<
       }
     }
   } catch {
-    // Failed to restore — treat as unauthenticated
     dispatch(authSignedOut());
+  }
+});
+
+// ─── Silent Token Refresh ─────────────────────────────────────────────────────
+
+/**
+ * Silently renew the backend access token using the stored refresh token.
+ * Called by the apiClient interceptor when the access token is about to expire
+ * (or has expired). Falls back to signing out on refresh token failure.
+ */
+export const silentTokenRefreshThunk = createAsyncThunk<
+  void,
+  void,
+  { dispatch: AppDispatch; state: RootState }
+>('auth/silentTokenRefresh', async (_, { dispatch, getState }) => {
+  try {
+    const { auth } = getState();
+    const currentRefreshToken = auth.refreshToken;
+
+    if (!currentRefreshToken) {
+      dispatch(authSignedOut());
+      return;
+    }
+
+    const tokens = await refreshSession(currentRefreshToken);
+
+    dispatch(backendTokenRefreshed({
+      accessToken:  tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn:    tokens.expiresIn,
+    }));
+  } catch {
+    // Refresh token expired or invalid — force sign-out
+    dispatch(authSignedOut());
+    dispatch(identityCleared());
   }
 });

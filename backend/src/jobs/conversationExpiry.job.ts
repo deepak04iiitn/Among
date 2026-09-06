@@ -7,14 +7,13 @@
  *  3. maxDurationExpiryJob — expires conversations at the 48-hour ceiling
  *  4. matchExpiryJob       — expires match requests past 15 minutes
  */
-import type Agenda from 'agenda';
+import type { Agenda } from 'agenda';
 import { ConversationModel } from '../modules/conversations/conversation.model';
 import { CONVERSATION_STATE } from '../constants/conversationStates';
 import {
   CONVERSATION_INACTIVITY_EXPIRY_MS,
   CONVERSATION_INACTIVITY_WARNING_MS,
   CONVERSATION_MAX_DURATION_WARNING_BEFORE_MS,
-  CONVERSATION_MAX_DURATION_WARNING_MS,
   INACTIVITY_WARNING_JOB_INTERVAL_MS,
   INACTIVITY_EXPIRY_JOB_INTERVAL_MS,
   MAX_DURATION_EXPIRY_JOB_INTERVAL_MS,

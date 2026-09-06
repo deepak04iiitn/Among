@@ -37,6 +37,11 @@ authRouter.post(
   controller.createSession
 );
 
+authRouter.post(
+  '/refresh',
+  controller.refreshSession
+);
+
 // ─── Users router (/api/users) ────────────────────────────────────────────────
 
 export const usersRouter = Router();

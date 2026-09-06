@@ -22,6 +22,9 @@ function makeStore() {
   return configureStore({ reducer: { discovery: discoveryReducer } });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDispatch = (action: any) => any;
+
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 function makeApiPost(id = 'post-1') {
@@ -56,7 +59,7 @@ describe('fetchHomeFeedThunk', () => {
     mockApi.getHomeFeed.mockResolvedValue({ primary, secondary });
 
     const store = makeStore();
-    await store.dispatch(fetchHomeFeedThunk());
+    await (store.dispatch as AnyDispatch)(fetchHomeFeedThunk());
 
     const state = store.getState().discovery;
     expect(state.primaryPost?.id).toBe('primary');
@@ -68,7 +71,7 @@ describe('fetchHomeFeedThunk', () => {
   it('sets feedError on failure', async () => {
     mockApi.getHomeFeed.mockRejectedValue(new Error('Network'));
     const store = makeStore();
-    await store.dispatch(fetchHomeFeedThunk());
+    await (store.dispatch as AnyDispatch)(fetchHomeFeedThunk());
     expect(store.getState().discovery.feedError).toBeTruthy();
     expect(store.getState().discovery.feedLoading).toBe(false);
   });
@@ -84,7 +87,7 @@ describe('fetchCategoryFeedThunk', () => {
     } as never);
 
     const store = makeStore();
-    await store.dispatch(fetchCategoryFeedThunk({ slug: 'loneliness' }));
+    await (store.dispatch as AnyDispatch)(fetchCategoryFeedThunk({ slug: 'loneliness' }));
 
     const state = store.getState().discovery;
     expect(state.categoryPosts).toHaveLength(1);
@@ -94,10 +97,10 @@ describe('fetchCategoryFeedThunk', () => {
   it('appends posts when append=true', async () => {
     mockApi.getCategoryFeed.mockResolvedValue({ posts: [makeApiPost('p1')], nextCursor: null } as never);
     const store = makeStore();
-    await store.dispatch(fetchCategoryFeedThunk({ slug: 'loneliness' }));
+    await (store.dispatch as AnyDispatch)(fetchCategoryFeedThunk({ slug: 'loneliness' }));
 
     mockApi.getCategoryFeed.mockResolvedValue({ posts: [makeApiPost('p2')], nextCursor: null } as never);
-    await store.dispatch(fetchCategoryFeedThunk({ slug: 'loneliness', append: true }));
+    await (store.dispatch as AnyDispatch)(fetchCategoryFeedThunk({ slug: 'loneliness', append: true }));
 
     expect(store.getState().discovery.categoryPosts).toHaveLength(2);
   });
@@ -112,7 +115,7 @@ describe('fetchYanaStatsThunk', () => {
     });
 
     const store = makeStore();
-    await store.dispatch(fetchYanaStatsThunk());
+    await (store.dispatch as AnyDispatch)(fetchYanaStatsThunk());
 
     expect(store.getState().discovery.yanaStats).toHaveLength(1);
     expect(store.getState().discovery.yanaStats[0]?.count).toBe(250);
@@ -126,7 +129,7 @@ describe('fetchSavedPostsThunk', () => {
     mockApi.getSavedPosts.mockResolvedValue({ posts: [makeApiPost()], nextCursor: null } as never);
 
     const store = makeStore();
-    await store.dispatch(fetchSavedPostsThunk({}));
+    await (store.dispatch as AnyDispatch)(fetchSavedPostsThunk({}));
 
     expect(store.getState().discovery.savedPosts).toHaveLength(1);
   });
@@ -138,7 +141,7 @@ describe('savePostThunk', () => {
   it('calls the API', async () => {
     mockApi.savePost.mockResolvedValue(undefined);
     const store = makeStore();
-    await store.dispatch(savePostThunk('post-123'));
+    await (store.dispatch as AnyDispatch)(savePostThunk('post-123'));
     expect(mockApi.savePost).toHaveBeenCalledWith('post-123');
   });
 });
@@ -147,7 +150,8 @@ describe('unsavePostThunk', () => {
   it('calls the API', async () => {
     mockApi.unsavePost.mockResolvedValue(undefined);
     const store = makeStore();
-    await store.dispatch(unsavePostThunk('post-123'));
+    await (store.dispatch as AnyDispatch)(unsavePostThunk('post-123'));
     expect(mockApi.unsavePost).toHaveBeenCalledWith('post-123');
   });
 });
+

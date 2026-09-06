@@ -69,7 +69,7 @@ export const editPostThunk = createAsyncThunk<
   async ({ id, body }, { dispatch, rejectWithValue }) => {
     try {
       const updated = await postsApi.editPost(id, body);
-      dispatch(postUpdated(updated));
+      dispatch(postUpdated(updated)); return;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to edit post';
       return rejectWithValue(message);
@@ -88,7 +88,7 @@ export const deletePostThunk = createAsyncThunk<
   async (id, { dispatch, rejectWithValue }) => {
     try {
       await postsApi.deletePost(id);
-      dispatch(postRemoved(id));
+      dispatch(postRemoved(id)); return;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to delete post';
       return rejectWithValue(message);
@@ -111,6 +111,7 @@ export const fetchPostThunk = createAsyncThunk<
       if ('body' in result) {
         dispatch(postAdded(result));
       }
+      return;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load post';
       return rejectWithValue(message);
@@ -129,7 +130,7 @@ export const fetchMyPostsThunk = createAsyncThunk<
   async (params, { dispatch, rejectWithValue }) => {
     try {
       const result = await postsApi.getMyPosts(params?.cursor, params?.limit);
-      dispatch(myPostsLoaded({ posts: result.posts, nextCursor: result.nextCursor }));
+      dispatch(myPostsLoaded({ posts: result.posts, nextCursor: result.nextCursor })); return;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load your posts';
       return rejectWithValue(message);

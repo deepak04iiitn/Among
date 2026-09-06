@@ -25,7 +25,7 @@ export const fetchHomeFeedThunk = createAsyncThunk<
     dispatch(feedLoading());
     try {
       const result = await discoveryApi.getHomeFeed();
-      dispatch(feedLoaded({ primary: result.primary, secondary: result.secondary }));
+      dispatch(feedLoaded({ primary: result.primary, secondary: result.secondary })); return;
     } catch {
       dispatch(feedError('Failed to load your feed. Please try again.'));
       return rejectWithValue('Failed to load feed.');
@@ -54,7 +54,7 @@ export const fetchCategoryFeedThunk = createAsyncThunk<
         publishedAt: p.publishedAt,
         categoryId:  p.categoryIds[0] ?? slug,
       }));
-      dispatch(categoryPostsLoaded({ posts, cursor: result.nextCursor, append }));
+      dispatch(categoryPostsLoaded({ posts, cursor: result.nextCursor, append })); return;
     } catch {
       dispatch(categoryPostsError('Failed to load category posts.'));
       return rejectWithValue('Failed to load category feed.');
@@ -74,7 +74,7 @@ export const fetchYanaStatsThunk = createAsyncThunk<
     dispatch(yanaLoading());
     try {
       const result = await discoveryApi.getYanaStats();
-      dispatch(yanaLoaded(result.entries));
+      dispatch(yanaLoaded(result.entries)); return;
     } catch {
       return rejectWithValue('Failed to load stats.');
     }
@@ -93,7 +93,7 @@ export const fetchSavedPostsThunk = createAsyncThunk<
     dispatch(savedLoading());
     try {
       const result = await discoveryApi.getSavedPosts(cursor);
-      dispatch(savedLoaded({ posts: result.posts, cursor: result.nextCursor, append }));
+      dispatch(savedLoaded({ posts: result.posts, cursor: result.nextCursor, append })); return;
     } catch {
       return rejectWithValue('Failed to load saved posts.');
     }
@@ -110,7 +110,7 @@ export const savePostThunk = createAsyncThunk<
   'discovery/savePost',
   async (postId, { rejectWithValue }) => {
     try {
-      await discoveryApi.savePost(postId);
+      await discoveryApi.savePost(postId); return;
     } catch {
       return rejectWithValue('Failed to save post.');
     }
@@ -127,7 +127,7 @@ export const unsavePostThunk = createAsyncThunk<
   'discovery/unsavePost',
   async (postId, { rejectWithValue }) => {
     try {
-      await discoveryApi.unsavePost(postId);
+      await discoveryApi.unsavePost(postId); return;
     } catch {
       return rejectWithValue('Failed to unsave post.');
     }

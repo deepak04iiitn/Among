@@ -13,8 +13,7 @@
  *  - Error message displayed
  */
 import * as React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ComposeForm } from './ComposeForm';
 import { POST_MIN_CHARS, POST_MAX_CHARS, COMPOSE_COUNTER_VISIBLE_THRESHOLD } from '../../constants/limits';
 

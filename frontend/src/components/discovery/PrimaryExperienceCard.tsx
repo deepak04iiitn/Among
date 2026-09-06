@@ -103,7 +103,7 @@ export function PrimaryExperienceCard({
 
       {/* ─── Author alias — always the smallest element ────────────── */}
       <footer className="max-w-2xl flex items-center gap-2.5">
-        <AvatarSVG seed={post.authorAvatarSeed} size="sm" aria-hidden="true" />
+        <AvatarSVG seed={post.authorAvatarSeed} size="sm" aliasName={post.authorAlias} aria-hidden="true" />
         <span className="text-caption text-[var(--color-text-muted)]">
           {post.authorAlias}
         </span>

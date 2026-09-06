@@ -1,14 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../../store';
+import type { NotificationType } from '../../constants/notificationTypes';
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-export type NotificationType =
-  | 'conversation_request'
-  | 'conversation_expiry_warning'
-  | 'conversation_expired'
-  | 'someone_needs_you'
-  | 'system';
+export type { NotificationType };
 
 export interface Notification {
   readonly id: string;

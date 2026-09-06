@@ -9,12 +9,10 @@
  *  - Has correct ARIA attributes.
  */
 import React from 'react';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import notificationsReducer, {
-  notificationsLoaded,
-} from '../../features/notifications/notificationsSlice';
+import notificationsReducer from '../../features/notifications/notificationsSlice';
 import * as thunks from '../../features/notifications/notificationsThunks';
 import NotificationBell from './NotificationBell';
 
@@ -40,7 +38,8 @@ function makeStore(preloaded?: Partial<ReturnType<typeof notificationsReducer>>)
 function renderBell(store: ReturnType<typeof makeStore>, onNavigate?: (p: string | null) => void) {
   return render(
     <Provider store={store}>
-      <NotificationBell onNavigate={onNavigate} />
+      {/* Spread so undefined props are omitted — required by exactOptionalPropertyTypes */}
+      <NotificationBell {...(onNavigate ? { onNavigate } : {})} />
     </Provider>
   );
 }
@@ -114,10 +113,7 @@ describe('NotificationBell', () => {
   });
 
   it('unread count badge disappears after mark all read', async () => {
-    mockMarkAllThunk.mockReturnValue((dispatch: any) => {
-      // Simulate marking all read
-      return Promise.resolve();
-    });
+    mockMarkAllThunk.mockReturnValue(() => Promise.resolve());
 
     const store = makeStore({ unreadCount: 2, panelOpen: true, items: [
       { id: 'n1', type: 'new_message', text: 'test', read: false, createdAt: new Date().toISOString(), targetPath: null },

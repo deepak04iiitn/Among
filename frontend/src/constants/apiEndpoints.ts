@@ -6,6 +6,7 @@ const BASE = '/api';
 export const API = {
   // ─── Auth ───────────────────────────────────────────────────────────────────
   AUTH_SESSION: `${BASE}/auth/session`,
+  AUTH_REFRESH: `${BASE}/auth/refresh`,
 
   // ─── Users ──────────────────────────────────────────────────────────────────
   USERS_ME: `${BASE}/users/me`,

@@ -10,7 +10,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import CategoryTile from '../../../components/identity/CategoryTile';
-import { EXPERIENCE_CATEGORIES } from '../../../constants/experienceCategories';
+import { EXPERIENCE_CATEGORIES, type ExperienceCategory } from '../../../constants/experienceCategories';
 import { ONBOARDING_CATEGORY_MIN, ONBOARDING_CATEGORY_MAX } from '../../../constants/limits';
 import { ROUTES } from '../../../constants/routes';
 
@@ -72,7 +72,7 @@ export default function OnboardingCategoriesPage() {
           aria-label="Select experience categories"
           className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10"
         >
-          {EXPERIENCE_CATEGORIES.map((category) => {
+          {EXPERIENCE_CATEGORIES.map((category: ExperienceCategory) => {
             const isSelected = selected.includes(category.id);
             const isDisabled = !isSelected && atLimit;
             return (

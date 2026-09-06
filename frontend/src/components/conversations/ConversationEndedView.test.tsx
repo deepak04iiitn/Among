@@ -34,6 +34,7 @@ const BASE_CONV: ConversationDetail = {
   expiresAt:          null,
   endedAt:            new Date().toISOString(),
   endReason:          'ended_by_user',
+  lastActivityAt:     null,
   feedbackSubmitted:  false,
   transcriptVisible:  true,
 };

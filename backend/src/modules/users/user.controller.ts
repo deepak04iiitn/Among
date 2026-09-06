@@ -7,7 +7,8 @@
  *  - All successful responses return only the explicitly listed fields below.
  */
 import type { Request, Response, NextFunction } from 'express';
-import { verifyFirebaseToken } from '../../config/firebase';
+import { verifyFirebaseToken }              from '../../config/firebase';
+import { issueTokenPair, verifyRefreshToken } from '../../services/jwt.service';
 import * as userService from './user.service';
 import type {
   CreateSessionInput,
@@ -29,15 +30,84 @@ export async function createSession(
 ): Promise<void> {
   try {
     const { idToken } = req.body;
+
+    // Verify Firebase ID token — the ONE place Firebase SDK is called
     const decoded = await verifyFirebaseToken(idToken);
     const user    = await userService.findOrCreateUser(decoded.uid, decoded.email ?? '');
 
-    // Return the minimum needed to hydrate the Redux auth slice
+    const isBanned = user.enforcementStatus?.isBanned ?? false;
+
+    // Issue backend JWT pair — client uses these for all subsequent requests
+    const tokens = issueTokenPair({
+      accountId:            String(user._id),
+      role:                 user.role,
+      hasCompletedOnboarding: user.hasCompletedOnboarding,
+    });
+
     res.status(200).json({
       accountId:              String(user._id),
       role:                   user.role,
       hasCompletedOnboarding: user.hasCompletedOnboarding,
-      isBanned:               user.enforcementStatus?.isBanned ?? false,
+      isBanned,
+      accessToken:            tokens.accessToken,
+      refreshToken:           tokens.refreshToken,
+      expiresIn:              tokens.expiresIn,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ─── POST /api/auth/refresh ───────────────────────────────────────────────────
+
+/**
+ * Exchange a valid refresh token for a new access + refresh token pair.
+ * No Firebase call — purely backend JWT verification.
+ */
+export async function refreshSession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { refreshToken } = req.body as { refreshToken?: string };
+    if (!refreshToken) {
+      res.status(401).json({ error: { code: 'ERR_UNAUTHORIZED', message: 'Refresh token required' } });
+      return;
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+
+    // Re-fetch current account state (catches role changes and bans)
+    const { UserModel } = await import('../users/user.model');
+    const account = await UserModel.findById(payload.sub)
+      .select('role hasCompletedOnboarding enforcementStatus')
+      .lean();
+
+    if (!account) {
+      res.status(401).json({ error: { code: 'ERR_UNAUTHORIZED', message: 'Account not found' } });
+      return;
+    }
+
+    const isBanned = (account as { enforcementStatus?: { isBanned?: boolean } })
+      .enforcementStatus?.isBanned ?? false;
+
+    if (isBanned) {
+      res.status(403).json({ error: { code: 'ERR_FORBIDDEN', message: 'Account is banned' } });
+      return;
+    }
+
+    const tokens = issueTokenPair({
+      accountId:            payload.sub,
+      role:                 (account as { role?: string }).role ?? payload.role,
+      hasCompletedOnboarding: (account as { hasCompletedOnboarding?: boolean }).hasCompletedOnboarding
+                               ?? payload.onboarded,
+    });
+
+    res.status(200).json({
+      accessToken:  tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn:    tokens.expiresIn,
     });
   } catch (err) {
     next(err);

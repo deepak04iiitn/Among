@@ -21,6 +21,17 @@ const mockUser: AuthUser = {
   isBanned:                false,
 };
 
+/** Helper: build a full authSuccess payload with dummy JWT fields. */
+function successPayload(idToken = 'tok') {
+  return {
+    user:         mockUser,
+    idToken,
+    accessToken:  'mock.access.token',
+    refreshToken: 'mock.refresh.token',
+    expiresIn:    900,
+  };
+}
+
 function makeStore() {
   return configureStore({ reducer: rootReducer });
 }
@@ -44,7 +55,7 @@ describe('authSlice', () => {
 
   it('sets authenticated status on authSuccess', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'tok_abc' }));
+    store.dispatch(authSuccess(successPayload('tok_abc')));
     const state = store.getState().auth;
     expect(state.status).toBe('authenticated');
     expect(state.user).toEqual(mockUser);
@@ -54,7 +65,7 @@ describe('authSlice', () => {
 
   it('clears user on authSignedOut', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'tok' }));
+    store.dispatch(authSuccess(successPayload()));
     store.dispatch(authSignedOut());
     const state = store.getState().auth;
     expect(state.user).toBeNull();
@@ -64,7 +75,7 @@ describe('authSlice', () => {
 
   it('sets error and clears user on authError', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'tok' }));
+    store.dispatch(authSuccess(successPayload()));
     store.dispatch(authError('ERR_ACCOUNT_BANNED'));
     const state = store.getState().auth;
     expect(state.error).toBe('ERR_ACCOUNT_BANNED');
@@ -74,7 +85,7 @@ describe('authSlice', () => {
 
   it('updates idToken without changing user on tokenRefreshed', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'old_tok' }));
+    store.dispatch(authSuccess(successPayload('old_tok')));
     store.dispatch(tokenRefreshed('new_tok'));
     const state = store.getState().auth;
     expect(state.idToken).toBe('new_tok');
@@ -83,7 +94,7 @@ describe('authSlice', () => {
 
   it('marks onboarding completed without changing other user fields', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'tok' }));
+    store.dispatch(authSuccess(successPayload()));
     store.dispatch(onboardingCompleted());
     const state = store.getState().auth;
     expect(state.user?.hasCompletedOnboarding).toBe(true);
@@ -97,13 +108,13 @@ describe('authSlice', () => {
 
   it('selectIsAuthenticated returns true after authSuccess', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'tok' }));
+    store.dispatch(authSuccess(successPayload()));
     expect(selectIsAuthenticated({ auth: store.getState().auth } as Parameters<typeof selectIsAuthenticated>[0])).toBe(true);
   });
 
   it('selectHasCompletedOnboarding returns false for new user', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'tok' }));
+    store.dispatch(authSuccess(successPayload()));
     expect(
       selectHasCompletedOnboarding({ auth: store.getState().auth } as Parameters<typeof selectHasCompletedOnboarding>[0])
     ).toBe(false);
@@ -111,7 +122,7 @@ describe('authSlice', () => {
 
   it('selectHasCompletedOnboarding returns true after onboardingCompleted', () => {
     const store = makeStore();
-    store.dispatch(authSuccess({ user: mockUser, idToken: 'tok' }));
+    store.dispatch(authSuccess(successPayload()));
     store.dispatch(onboardingCompleted());
     expect(
       selectHasCompletedOnboarding({ auth: store.getState().auth } as Parameters<typeof selectHasCompletedOnboarding>[0])
@@ -128,7 +139,7 @@ describe('authSlice', () => {
   describe('privacy invariant', () => {
     it('authUser object does not include email field', () => {
       const store = makeStore();
-      store.dispatch(authSuccess({ user: mockUser, idToken: 'tok' }));
+      store.dispatch(authSuccess(successPayload()));
       const user = selectAuthUser({ auth: store.getState().auth } as Parameters<typeof selectAuthUser>[0]);
       expect(user).not.toHaveProperty('email');
     });

@@ -18,6 +18,18 @@ export interface SessionResponse {
   readonly role:                   string;
   readonly hasCompletedOnboarding: boolean;
   readonly isBanned:               boolean;
+  /** Backend-issued access token (15 min TTL) */
+  readonly accessToken:            string;
+  /** Backend-issued refresh token (30 day TTL) */
+  readonly refreshToken:           string;
+  /** Access token TTL in seconds */
+  readonly expiresIn:              number;
+}
+
+export interface RefreshResponse {
+  readonly accessToken:  string;
+  readonly refreshToken: string;
+  readonly expiresIn:    number;
 }
 
 export interface PrivateProfile {
@@ -51,6 +63,18 @@ export async function createSession(idToken: string): Promise<SessionResponse> {
   const response = await apiClient.post<SessionResponse>(
     API.AUTH_SESSION,
     { idToken }
+  );
+  return response.data;
+}
+
+/**
+ * Exchange a refresh token for a new backend JWT pair.
+ * Called automatically by the apiClient interceptor — not called directly by UI code.
+ */
+export async function refreshSession(refreshToken: string): Promise<RefreshResponse> {
+  const response = await apiClient.post<RefreshResponse>(
+    API.AUTH_REFRESH,
+    { refreshToken }
   );
   return response.data;
 }

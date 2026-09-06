@@ -26,6 +26,10 @@ const EnvironmentSchema = z.object({
   // ─── Logging ──────────────────────────────────────────────────────────────
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
 
+  // ─── JWT ─────────────────────────────────────────────────────────────────
+  // Must be ≥32 chars. Generate with: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+
   // ─── Rate limiting (in-memory) ────────────────────────────────────────────
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),

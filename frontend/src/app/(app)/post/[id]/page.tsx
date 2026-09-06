@@ -11,7 +11,6 @@
  * Privacy: post body is never included in meta tags or OG preview.
  */
 import type { Metadata }  from 'next';
-import { notFound }       from 'next/navigation';
 import Link               from 'next/link';
 import JsonLd             from '../../../../components/common/JsonLd';
 import AppShell           from '../../../../components/layout/AppShell';

@@ -11,6 +11,7 @@ import type { AppDispatch } from '../../store';
 import {
   selectMatchingState,
   selectMatchingRequestId,
+  selectActiveConversationId,
 } from '../../features/conversations/conversationsSlice';
 import {
   cancelMatchRequestThunk,
@@ -27,9 +28,10 @@ interface MatchingStateProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MatchingState({ onMatchFound }: MatchingStateProps): React.JSX.Element {
-  const dispatch     = useDispatch<AppDispatch>();
-  const matchState   = useSelector(selectMatchingState);
-  const requestId    = useSelector(selectMatchingRequestId);
+  const dispatch            = useDispatch<AppDispatch>();
+  const matchState          = useSelector(selectMatchingState);
+  const requestId           = useSelector(selectMatchingRequestId);
+  const activeConversationId = useSelector(selectActiveConversationId);
 
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
@@ -41,6 +43,13 @@ export default function MatchingState({ onMatchFound }: MatchingStateProps): Rea
     const timer = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
     return () => clearInterval(timer);
   }, [matchState]);
+
+  // Notify parent when a match is found
+  useEffect(() => {
+    if (matchState === 'matched' && activeConversationId && onMatchFound) {
+      onMatchFound(activeConversationId);
+    }
+  }, [matchState, activeConversationId, onMatchFound]);
 
   const handleCancel = (): void => {
     if (requestId) {

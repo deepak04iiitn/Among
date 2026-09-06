@@ -34,6 +34,7 @@ export interface ConversationDetail {
   requestedAt:        string;
   matchedAt:          string | null;
   startedAt:          string | null;
+  lastActivityAt:     string | null;
   expiresAt:          string | null;
   endedAt:            string | null;
   endReason:          string | null;

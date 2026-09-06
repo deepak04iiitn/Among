@@ -94,7 +94,7 @@ describe('CategorySelector', () => {
   });
 
   it('does NOT allow selection beyond maxSelections', () => {
-    const { onChange } = setup({ selectedIds: ['loneliness', 'grief', 'career'], maxSelections: 3 });
+    setup({ selectedIds: ['loneliness', 'grief', 'career'], maxSelections: 3 });
     // All 3 are selected and maxSelections is 3 — clicking another should not call onChange
     // But all 3 categories ARE already selected, so there's nothing new to click here.
     // Re-setup with a 2 max to test overflow prevention

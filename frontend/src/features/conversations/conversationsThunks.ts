@@ -115,9 +115,10 @@ export function fetchMessagesThunk(conversationId: string, opts?: { cursor?: str
   return async (dispatch: AppDispatch): Promise<void> => {
     dispatch(messagesLoading());
     try {
-      const result = await conversationsApi.getMessages(conversationId, {
-        cursor: opts?.cursor,
-      });
+      const result = await conversationsApi.getMessages(
+        conversationId,
+        opts?.cursor ? { cursor: opts.cursor } : {}
+      );
       dispatch(messagesLoaded({
         conversationId,
         messages:  result.messages,

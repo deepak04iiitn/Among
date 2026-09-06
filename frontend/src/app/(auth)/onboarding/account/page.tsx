@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import AgeGate from '../../../components/onboarding/AgeGate';
 import TermsAcceptance from '../../../components/onboarding/TermsAcceptance';
-import { signInWithGoogle, getIdToken } from '../../../lib/firebaseClient';
+import { signInWithGoogle } from '../../../lib/firebaseClient';
 import { createSession, completeOnboarding } from '../../../lib/authApi';
 import { authSuccess, onboardingCompleted } from '../../../features/auth/authSlice';
 import { identityLoaded } from '../../../features/identity/identitySlice';
@@ -82,6 +82,9 @@ export default function OnboardingAccountPage() {
             hasCompletedOnboarding: false,
           },
           idToken,
+          accessToken:  session.accessToken,
+          refreshToken: session.refreshToken,
+          expiresIn:    session.expiresIn,
         })
       );
 
@@ -237,6 +240,9 @@ async function handleExistingSignIn({
           hasCompletedOnboarding: session.hasCompletedOnboarding,
         },
         idToken,
+        accessToken:  session.accessToken,
+        refreshToken: session.refreshToken,
+        expiresIn:    session.expiresIn,
       })
     );
 

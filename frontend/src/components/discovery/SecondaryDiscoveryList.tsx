@@ -87,7 +87,7 @@ function SecondaryCard({ post, isLast }: SecondaryCardProps) {
 
       {/* Footer: alias + same count + time */}
       <footer className="flex items-center gap-3 mt-4">
-        <AvatarSVG seed={post.authorAvatarSeed} size="sm" aria-hidden="true" />
+        <AvatarSVG seed={post.authorAvatarSeed} size="sm" aliasName={post.authorAlias} aria-hidden="true" />
         <span className="text-caption text-[var(--color-text-muted)]">
           {post.authorAlias}
         </span>

@@ -33,6 +33,8 @@ function makeStore() {
 }
 
 type TestStore = ReturnType<typeof makeStore>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDispatch = (action: any) => any;
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -85,7 +87,7 @@ describe('createPostThunk', () => {
       safetyWarnings:  [],
     });
 
-    await store.dispatch(createPostThunk(CREATE_INPUT));
+    await (store.dispatch as AnyDispatch)(createPostThunk(CREATE_INPUT));
 
     const state = store.getState().posts;
     expect(state.byId[POST_ID]).toBeDefined();
@@ -97,7 +99,7 @@ describe('createPostThunk', () => {
   it('sets composeError on failure', async () => {
     mockApi.createPost.mockRejectedValue(new Error('Network error'));
 
-    await store.dispatch(createPostThunk(CREATE_INPUT));
+    await (store.dispatch as AnyDispatch)(createPostThunk(CREATE_INPUT));
 
     const state = store.getState().posts;
     expect(state.submitting).toBe(false);
@@ -119,14 +121,14 @@ describe('createPostThunk', () => {
       reducer: { posts: postsReducer },
       middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(
-          (_store) => (next) => (action) => {
+          (_store: unknown) => (next: (a: unknown) => unknown) => (action: unknown) => {
             dispatched.push(action);
             return next(action as Parameters<typeof next>[0]);
           }
         ),
     });
 
-    await storeWithMiddleware.dispatch(createPostThunk(CREATE_INPUT));
+    await (storeWithMiddleware.dispatch as AnyDispatch)(createPostThunk(CREATE_INPUT));
 
     // Verify crisis banner action was dispatched
     const crisisAction = dispatched.find(
@@ -148,14 +150,14 @@ describe('createPostThunk', () => {
       reducer: { posts: postsReducer },
       middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(
-          (_store) => (next) => (action) => {
+          (_store: unknown) => (next: (a: unknown) => unknown) => (action: unknown) => {
             dispatched.push(action);
             return next(action as Parameters<typeof next>[0]);
           }
         ),
     });
 
-    await storeWithMiddleware.dispatch(createPostThunk(CREATE_INPUT));
+    await (storeWithMiddleware.dispatch as AnyDispatch)(createPostThunk(CREATE_INPUT));
 
     const crisisAction = dispatched.find(
       (a) => typeof a === 'object' && a !== null && (a as { type: string }).type === 'notifications/showCrisisBanner'
@@ -171,7 +173,7 @@ describe('createPostThunk', () => {
       safetyWarnings:  [],
     });
 
-    await store.dispatch(createPostThunk(CREATE_INPUT));
+    await (store.dispatch as AnyDispatch)(createPostThunk(CREATE_INPUT));
 
     expect(store.getState().posts.draftPost).toBeNull();
   });
@@ -194,7 +196,7 @@ describe('editPostThunk', () => {
     const newBody = 'Updated body with more than twenty characters here.';
     mockApi.editPost.mockResolvedValue(makeApiPost({ body: newBody }));
 
-    await store.dispatch(editPostThunk({ id: POST_ID, body: newBody }));
+    await (store.dispatch as AnyDispatch)(editPostThunk({ id: POST_ID, body: newBody }));
 
     expect(store.getState().posts.byId[POST_ID]?.body).toBe(newBody);
   });
@@ -206,7 +208,7 @@ describe('editPostThunk', () => {
     const newBody = 'Updated body with more than twenty characters here.';
     mockApi.editPost.mockResolvedValue(makeApiPost({ body: newBody }));
 
-    await store.dispatch(editPostThunk({ id: POST_ID, body: newBody }));
+    await (store.dispatch as AnyDispatch)(editPostThunk({ id: POST_ID, body: newBody }));
 
     expect(store.getState().posts.byId[OTHER_ID]).toBeDefined();
   });
@@ -227,7 +229,7 @@ describe('deletePostThunk', () => {
   it('removes post from byId', async () => {
     mockApi.deletePost.mockResolvedValue(undefined);
 
-    await store.dispatch(deletePostThunk(POST_ID));
+    await (store.dispatch as AnyDispatch)(deletePostThunk(POST_ID));
 
     expect(store.getState().posts.byId[POST_ID]).toBeUndefined();
   });
@@ -235,7 +237,7 @@ describe('deletePostThunk', () => {
   it('removes post from myPosts', async () => {
     mockApi.deletePost.mockResolvedValue(undefined);
 
-    await store.dispatch(deletePostThunk(POST_ID));
+    await (store.dispatch as AnyDispatch)(deletePostThunk(POST_ID));
 
     expect(store.getState().posts.myPosts).not.toContain(POST_ID);
   });
@@ -254,7 +256,7 @@ describe('fetchPostThunk', () => {
   it('adds published post to byId', async () => {
     mockApi.getPost.mockResolvedValue(makeApiPost());
 
-    await store.dispatch(fetchPostThunk(POST_ID));
+    await (store.dispatch as AnyDispatch)(fetchPostThunk(POST_ID));
 
     expect(store.getState().posts.byId[POST_ID]).toBeDefined();
   });
@@ -262,8 +264,9 @@ describe('fetchPostThunk', () => {
   it('does not crash on deleted post redirect response', async () => {
     mockApi.getPost.mockResolvedValue({ status: 'deleted_by_user', redirectCategoryId: 'loneliness' });
 
-    await expect(store.dispatch(fetchPostThunk(POST_ID))).resolves.not.toThrow();
+    await expect((store.dispatch as AnyDispatch)(fetchPostThunk(POST_ID))).resolves.not.toThrow();
     // No post should be in byId (it was deleted)
     expect(store.getState().posts.byId[POST_ID]).toBeUndefined();
   });
 });
+

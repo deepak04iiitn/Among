@@ -1,10 +1,10 @@
 /**
  * useFeatureFlag.test.ts — Unit tests for the useFeatureFlag hook.
  */
+import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { createElement } from 'react';
 import { useFeatureFlag } from './useFeatureFlag';
 import featureFlagsReducer, {
   flagOverridden,
@@ -16,7 +16,7 @@ function makeStore() {
 
 function wrapper(store: ReturnType<typeof makeStore>) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return createElement(Provider, { store }, children);
+    return React.createElement(Provider, { store, children });
   };
 }
 

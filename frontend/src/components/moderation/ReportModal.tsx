@@ -64,11 +64,12 @@ export default function ReportModal(): React.JSX.Element | null {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReason) return;
+    const trimmed = additionalDetails.trim();
     void dispatch(submitReportThunk({
-      contentType:       target.contentType,
-      contentId:         target.contentId,
-      reason:            selectedReason,
-      additionalDetails: additionalDetails.trim() || undefined,
+      contentType: target.contentType,
+      contentId:   target.contentId,
+      reason:      selectedReason,
+      ...(trimmed ? { additionalDetails: trimmed } : {}),
     }));
   };
 

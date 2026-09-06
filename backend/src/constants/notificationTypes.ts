@@ -7,6 +7,7 @@ export const NOTIFICATION_TYPE = {
   NEW_MESSAGE:          'new_message',
   EXPIRY_WARNING:       'expiry_warning',
   MODERATION_ACTION:    'moderation_action',
+  SYSTEM:               'system',
 } as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
@@ -23,6 +24,7 @@ export const NOTIFICATION_GENERIC_TEXT: Readonly<Record<NotificationType, string
   [NOTIFICATION_TYPE.NEW_MESSAGE]:       'You have a new message on AMONG.',
   [NOTIFICATION_TYPE.EXPIRY_WARNING]:    'Your conversation on AMONG is about to end.',
   [NOTIFICATION_TYPE.MODERATION_ACTION]: 'There is an update to your account on AMONG.',
+  [NOTIFICATION_TYPE.SYSTEM]:            'You have a notification on AMONG.',
 } as const;
 
 export const NOTIFICATION_REFERENCE_TYPE = {

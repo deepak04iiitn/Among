@@ -61,7 +61,7 @@ it('redirects role=user to landing', () => {
     isLoading:              false,
     isAuthenticated:        true,
     hasCompletedOnboarding: true,
-    user:                   { accountId: 'u1', role: 'user', hasCompletedOnboarding: true, isBanned: false },
+    user:                   { accountId: 'u1', role: 'user', hasCompletedOnboarding: true, isBanned: false, firebaseUid: '' },
   });
   render(<AdminGuard><p>Children</p></AdminGuard>);
   expect(mockReplace).toHaveBeenCalledWith('/');
@@ -73,7 +73,7 @@ it('renders children for role=moderator', () => {
     isLoading:              false,
     isAuthenticated:        true,
     hasCompletedOnboarding: true,
-    user:                   { accountId: 'u2', role: 'moderator', hasCompletedOnboarding: true, isBanned: false },
+    user:                   { accountId: 'u2', role: 'moderator', hasCompletedOnboarding: true, isBanned: false, firebaseUid: '' },
   });
   render(<AdminGuard><p>Admin content</p></AdminGuard>);
   expect(screen.getByText('Admin content')).toBeDefined();
@@ -84,7 +84,7 @@ it('renders children for role=admin', () => {
     isLoading:              false,
     isAuthenticated:        true,
     hasCompletedOnboarding: true,
-    user:                   { accountId: 'u3', role: 'admin', hasCompletedOnboarding: true, isBanned: false },
+    user:                   { accountId: 'u3', role: 'admin', hasCompletedOnboarding: true, isBanned: false, firebaseUid: '' },
   });
   render(<AdminGuard><p>Admin content</p></AdminGuard>);
   expect(screen.getByText('Admin content')).toBeDefined();
@@ -95,7 +95,7 @@ it('shows config link only for admin role', () => {
     isLoading:              false,
     isAuthenticated:        true,
     hasCompletedOnboarding: true,
-    user:                   { accountId: 'u4', role: 'admin', hasCompletedOnboarding: true, isBanned: false },
+    user:                   { accountId: 'u4', role: 'admin', hasCompletedOnboarding: true, isBanned: false, firebaseUid: '' },
   });
   render(<AdminGuard><p>content</p></AdminGuard>);
   expect(screen.getByText('Config')).toBeDefined();
@@ -106,7 +106,7 @@ it('does not show config link for moderator role', () => {
     isLoading:              false,
     isAuthenticated:        true,
     hasCompletedOnboarding: true,
-    user:                   { accountId: 'u5', role: 'moderator', hasCompletedOnboarding: true, isBanned: false },
+    user:                   { accountId: 'u5', role: 'moderator', hasCompletedOnboarding: true, isBanned: false, firebaseUid: '' },
   });
   render(<AdminGuard><p>content</p></AdminGuard>);
   expect(screen.queryByText('Config')).toBeNull();

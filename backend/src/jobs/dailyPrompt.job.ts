@@ -8,7 +8,7 @@
  *
  * Schedule: once daily at configurable time (default 09:00 UTC).
  */
-import type Agenda from 'agenda';
+import type { Agenda } from 'agenda';
 import { UserModel } from '../modules/users/user.model';
 import * as experienceGraphService from '../modules/experienceGraph/experienceGraph.service';
 import * as snyService from '../modules/someoneNeedsYou/someoneNeedsYou.service';

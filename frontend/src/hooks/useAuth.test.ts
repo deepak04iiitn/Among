@@ -25,9 +25,10 @@ jest.mock('../features/auth/authThunks', () => ({
 
 import { useAuth } from './useAuth';
 
-function makeWrapper(store: ReturnType<typeof configureStore<typeof rootReducer>>) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function makeWrapper(store: any) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return React.createElement(Provider, { store }, children);
+    return React.createElement(Provider, { store, children });
   };
 }
 

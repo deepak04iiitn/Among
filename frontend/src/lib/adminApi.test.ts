@@ -24,7 +24,6 @@ jest.mock('./apiClient', () => ({
 }));
 
 const mockGet  = apiClient.get  as jest.Mock;
-const mockPost = apiClient.post as jest.Mock;
 const mockPut  = apiClient.put  as jest.Mock;
 
 beforeEach(() => {

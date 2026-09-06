@@ -127,7 +127,7 @@ export default function NotificationBell({
           )}
           role="presentation"
         >
-          <NotificationList onNavigate={onNavigate} />
+          <NotificationList {...(onNavigate ? { onNavigate } : {})} />
         </div>
       )}
     </div>
