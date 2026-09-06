@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { AppError, isOperationalError } from '../utils/errors';
+import { isOperationalError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { ERR_INTERNAL } from '../constants/errorCodes';
 

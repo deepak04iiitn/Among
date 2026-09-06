@@ -1,11 +1,11 @@
-import type { DecodedIdToken } from 'firebase-admin/auth';
+import type { AuthenticatedUser } from './auth.types';
 
-// Augment Express Request to include authenticated user
+// Augment Express Request to carry the authenticated AMONG account
 declare global {
   namespace Express {
     interface Request {
-      /** Present only on authenticated routes (after requireAuth middleware) */
-      user?: DecodedIdToken;
+      /** Present only on routes protected by requireAuth / requireAdmin middleware */
+      user?: AuthenticatedUser;
     }
   }
 }

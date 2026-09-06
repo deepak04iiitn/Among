@@ -9,7 +9,7 @@ const config: Config = {
   testEnvironment: 'jest-environment-jsdom',
   rootDir: 'src',
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
-  setupFilesAfterFramework: ['@testing-library/jest-dom'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^@constants/(.*)$': '<rootDir>/constants/$1',

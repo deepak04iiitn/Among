@@ -104,7 +104,7 @@ Every phase concludes with unit tests for all code produced in that phase. No fe
 | Authentication | Firebase Authentication + Google Sign-In | Credential management, JWT issuance |
 | Real-time messaging | Socket.IO (on Express) | Temporary conversation message delivery |
 | Job scheduling | Agenda (MongoDB-backed) | Conversation expiry, daily prompts, alias rotation |
-| Caching | Redis | Session cache, rate-limit counters, feed cache |
+| Rate limiting | express-rate-limit (in-memory) | Per-route sliding window limiters |
 | Testing (backend) | Jest + Supertest | Unit and integration tests |
 | Testing (frontend) | Jest + React Testing Library | Unit tests for components, hooks, slices |
 | Linting | ESLint + Prettier | Code quality and formatting |
@@ -203,7 +203,7 @@ Every phase concludes with unit tests for all code produced in that phase. No fe
 │   │   │   ├── index.ts
 │   │   │   ├── database.ts
 │   │   │   ├── firebase.ts
-│   │   │   ├── redis.ts
+│   │   │   └── environment.ts
 │   │   │   └── environment.ts
 │   │   ├── middleware/
 │   │   │   ├── auth.middleware.ts
@@ -608,7 +608,7 @@ There is no shared package. Constants are defined in the project that owns them.
 - `environment.ts`: Validates all environment variables at startup using Zod; throws on missing required values.
 - `featureFlags.ts`: Loads feature flag values from a persistent store (admin-configurable MongoDB document). Feature flags are refreshed on a configurable interval and exposed via a typed accessor.
 - `database.ts`: MongoDB connection configuration with connection pooling settings.
-- `redis.ts`: Redis client initialization, used for rate limiting and caching.
+- Rate limiting is handled in-memory via `express-rate-limit` — no external cache required.
 
 ### 4.3 Frontend Constants (`frontend/src/constants/`)
 
@@ -658,7 +658,7 @@ All design values are defined as Tailwind theme extensions, not hardcoded in com
 
 ### 5.3 Backend scaffolding
 
-1. Initialize `/backend` with `package.json` and install all dependencies: `express`, `mongoose`, `firebase-admin`, `ioredis`, `socket.io`, `zod`, `agenda`, `winston`, `helmet`, `cors`, `express-rate-limit`.
+1. Initialize `/backend` with `package.json` and install all dependencies: `express`, `mongoose`, `firebase-admin`, `socket.io`, `zod`, `agenda`, `winston`, `helmet`, `cors`, `express-rate-limit`.
 2. Install dev dependencies: `typescript`, `ts-node`, `jest`, `@types/*`, `supertest`, `ts-jest`.
 3. Configure `tsconfig.json` with strict mode, path aliases (`@modules`, `@utils`, `@config`, `@middleware`).
 4. Configure `jest.config.ts`: coverage thresholds, test match patterns, module name mappers.
@@ -686,7 +686,7 @@ All design values are defined as Tailwind theme extensions, not hardcoded in com
 
 ## 6. Phase 1 — Core Backend Infrastructure
 
-**Goal:** Working Express server with MongoDB, Redis, Firebase Admin, logging, error handling, validation middleware, and rate limiting operational. No product features yet.
+**Goal:** Working Express server with MongoDB, Firebase Admin, logging, error handling, validation middleware, and in-memory rate limiting operational. No product features yet.
 
 **Dependencies:** Phase 0 complete.
 
@@ -695,7 +695,7 @@ All design values are defined as Tailwind theme extensions, not hardcoded in com
 ### 6.1 Environment configuration
 
 1. Implement `backend/src/config/environment.ts`:
-   - Use Zod to declare and validate all required env vars: `MONGODB_URI`, `REDIS_URL`, `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`, `PORT`, `NODE_ENV`, `CORS_ORIGIN`, `JWT_AUDIENCE`.
+   - Use Zod to declare and validate all required env vars: `MONGODB_URI`, `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`, `PORT`, `NODE_ENV`, `ALLOWED_ORIGINS`.
    - Export a typed `env` object.
    - Throw a descriptive error at startup if any required variable is missing or fails validation.
 2. Wire `environment.ts` as the first import in `server.ts` so startup fails fast with a clear message.
@@ -720,14 +720,10 @@ All design values are defined as Tailwind theme extensions, not hardcoded in com
 
 **Unit tests:** Mock Firebase Admin SDK, assert `verifyFirebaseToken` returns decoded payload on valid token, throws `AppError` with `ERR_UNAUTHORIZED` on invalid token.
 
-### 6.4 Redis connection
+### 6.4 ~~Redis~~ — Not used
 
-1. Implement `backend/src/config/redis.ts`:
-   - ioredis client with reconnect strategy.
-   - Export `redisClient` and helper functions: `get`, `set`, `del`, `incr`, `expire`.
-   - Graceful degradation: if Redis is unavailable, rate limiting falls back to in-memory (log a warning — do not crash).
-
-**Unit tests:** Mock ioredis, assert helper functions call the correct underlying commands, assert fallback triggers when Redis throws.
+Rate limiting is handled entirely in-memory using `express-rate-limit`. No external cache is needed.
+Matching queues (Phase 7) are handled via MongoDB queries rather than Redis sorted sets.
 
 ### 6.5 Logging
 
@@ -780,7 +776,7 @@ All design values are defined as Tailwind theme extensions, not hardcoded in com
 ### 6.9 Rate limiting middleware
 
 1. Implement `backend/src/middleware/rateLimiter.middleware.ts`:
-   - Redis-backed sliding window rate limiter.
+   - In-memory sliding window rate limiter (`express-rate-limit`).
    - Configurable `windowMs` and `max` parameters, loaded from `shared/constants/limits.ts` (never hardcoded).
    - Rate limits are keyed by internal account ID (not IP address alone — IP can be shared/spoofed).
    - On limit exceeded: return `ERR_RATE_LIMITED` with `Retry-After` header.
@@ -1974,10 +1970,10 @@ Implement `backend/src/modules/conversations/matching.service.ts`:
    - Check no active conversation already in progress.
    - Create `Conversation` with `state: REQUESTED`.
    - Set `matchRequestExpiresAt`.
-   - Add to matching queue (Redis sorted set, sorted by wait time for fairness).
+   - Add to matching queue (MongoDB collection, sorted by createdAt for fairness).
    - Attempt immediate match (see below).
 2. `findMatch(newRequest: Conversation)`:
-   - Query Redis queue for eligible requests in compatible categories.
+   - Query MongoDB matching queue for eligible requests in compatible categories.
    - Eligibility: same (or related) `contextCategoryId`, not the same account, not blocked by either party.
    - On match found: update both conversations to `state: MATCHED_PENDING`, set `matchedAt`, notify both via socket.
    - On no match: leave in queue until `matchRequestExpiresAt`, then run `expireMatchRequest`.
@@ -2750,7 +2746,7 @@ Implement `backend/src/modules/subscription/subscription.service.ts`:
    - All environment variables documented in `.env.example`.
    - Database indexes verified.
    - MongoDB connection pooling configured for production load.
-   - Redis connection configured.
+   - Rate limiting middleware configured.
    - Agenda job scheduler starts with the server.
    - Helmet security headers active.
    - CORS configured to production domain only.
@@ -2774,7 +2770,7 @@ Implement `backend/src/modules/subscription/subscription.service.ts`:
 
 1. Tests must be **deterministic** — same inputs always produce the same result.
 2. Tests must be **isolated** — no test relies on another test's state.
-3. **Mock external services** — MongoDB (use `mongodb-memory-server` for integration-adjacent tests), Firebase Admin SDK, Redis, Socket.IO, email provider.
+3. **Mock external services** — MongoDB (use `mongodb-memory-server` for integration-adjacent tests), Firebase Admin SDK, Socket.IO, email provider.
 4. **Test observable behavior** — what the function does, not how it does it internally.
 5. **Include both happy-path and edge/error-path** tests for every function.
 6. **Test authorization** explicitly — not just "authenticated user succeeds," but "unauthenticated user fails," "wrong-role user fails," and "correct-role user succeeds."
@@ -2831,7 +2827,7 @@ conversation.matching.test.ts         → match eligibility, blocking, rate limi
 Create `backend/src/test/` and `frontend/src/test/` directories:
 
 - `backend/src/test/factories.ts` — typed factory functions for creating test fixtures (user, post, reaction, conversation, message) with sensible defaults.
-- `backend/src/test/mocks.ts` — shared mock implementations for Firebase Admin, Redis, email provider.
+- `backend/src/test/mocks.ts` — shared mock implementations for Firebase Admin, Socket.IO, email provider.
 - `backend/src/test/dbSetup.ts` — `beforeAll`/`afterAll` for `mongodb-memory-server` startup.
 - `frontend/src/test/renderWithProviders.tsx` — renders component wrapped in Redux Provider + theme with default test store state.
 - `frontend/src/test/storeFactory.ts` — creates a test Redux store with overridable slice state.

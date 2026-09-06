@@ -5,7 +5,8 @@ export * from './postStates';
 export * from './userRoles';
 export * from './subscriptionTiers';
 export * from './limits';
-export * from './timeouts';
+// timeouts exports POST_EDIT_WINDOW_MS which clashes with limits — import explicitly where needed
+// export * from './timeouts';
 export * from './reportReasons';
 export * from './errorCodes';
 export * from './socketEvents';

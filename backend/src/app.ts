@@ -13,6 +13,8 @@ import cookieParser from 'cookie-parser';
 import { env } from './config/environment';
 import { requestLoggerMiddleware } from './middleware/requestLogger.middleware';
 import { errorHandlerMiddleware } from './middleware/errorHandler.middleware';
+import { sanitizeBody } from './middleware/sanitize.middleware';
+import { globalRateLimiter } from './middleware/rateLimiter.middleware';
 
 export function createApp(): express.Application {
   const app = express();
@@ -48,8 +50,14 @@ export function createApp(): express.Application {
   // ─── Logging ─────────────────────────────────────────────────────────────
   app.use(requestLoggerMiddleware);
 
-  // ─── Trust proxy (for rate limiting behind load balancer) ─────────────────
+  // ─── Trust proxy (for rate limiting / IP detection behind load balancer) ──
   app.set('trust proxy', 1);
+
+  // ─── Global rate limiting ─────────────────────────────────────────────────
+  app.use(globalRateLimiter);
+
+  // ─── Global sanitization ──────────────────────────────────────────────────
+  app.use(sanitizeBody);
 
   // ─── Health check ─────────────────────────────────────────────────────────
   app.get('/health', (_req: Request, res: Response) => {
@@ -57,7 +65,7 @@ export function createApp(): express.Application {
   });
 
   // ─── API routes ───────────────────────────────────────────────────────────
-  // Routes will be registered here in later phases, e.g.:
+  // Feature routes are registered here in later phases, e.g.:
   // app.use('/api/auth', authRouter);
   // app.use('/api/posts', postsRouter);
 

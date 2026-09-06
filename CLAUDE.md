@@ -47,7 +47,7 @@ Every technical decision should be evaluated against these principles:
 | Database | MongoDB (Mongoose ODM) |
 | Authentication | Firebase Authentication + Google Sign-In |
 | Real-time | Socket.IO |
-| Caching / rate limiting | Redis |
+| Rate limiting | express-rate-limit (in-memory) |
 | Job scheduling | Agenda (MongoDB-backed) |
 | Language | TypeScript (strict mode, full-stack) |
 

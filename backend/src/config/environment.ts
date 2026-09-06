@@ -15,9 +15,6 @@ const EnvironmentSchema = z.object({
   // ─── MongoDB ──────────────────────────────────────────────────────────────
   MONGODB_URI: z.string().url('MONGODB_URI must be a valid URL'),
 
-  // ─── Redis ────────────────────────────────────────────────────────────────
-  REDIS_URL: z.string().url('REDIS_URL must be a valid URL'),
-
   // ─── Firebase ─────────────────────────────────────────────────────────────
   FIREBASE_PROJECT_ID: z.string().min(1),
   FIREBASE_CLIENT_EMAIL: z.string().email(),
@@ -26,13 +23,10 @@ const EnvironmentSchema = z.object({
   // ─── CORS ─────────────────────────────────────────────────────────────────
   ALLOWED_ORIGINS: z.string().min(1).default('http://localhost:3000'),
 
-  // ─── Feature flags store (MongoDB collection name) ────────────────────────
-  FEATURE_FLAGS_COLLECTION: z.string().default('featureFlags'),
-
   // ─── Logging ──────────────────────────────────────────────────────────────
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
 
-  // ─── Rate limiting ────────────────────────────────────────────────────────
+  // ─── Rate limiting (in-memory) ────────────────────────────────────────────
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
 });

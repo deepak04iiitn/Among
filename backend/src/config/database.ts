@@ -4,6 +4,11 @@ import { logger } from '../utils/logger';
 
 let isConnected = false;
 
+/** Exposed for testing only — resets connection state between test cases */
+export function _resetConnectionState(): void {
+  isConnected = false;
+}
+
 export async function connectDatabase(): Promise<void> {
   if (isConnected) return;
 

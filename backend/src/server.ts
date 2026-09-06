@@ -2,22 +2,20 @@
  * server.ts — HTTP + Socket.IO server entry point.
  *
  * Starts the HTTP server and Socket.IO gateway.
- * Connects to MongoDB and Redis on startup.
+ * Connects to MongoDB on startup.
  */
 import http from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { createApp } from './app';
 import { env } from './config/environment';
 import { connectDatabase, disconnectDatabase } from './config/database';
-import { getRedisClient, disconnectRedis } from './config/redis';
 import { getFirebaseApp } from './config/firebase';
 import { logger } from './utils/logger';
 
 async function bootstrap(): Promise<void> {
   // Validate env and connect to dependencies before booting
   await connectDatabase();
-  getRedisClient();    // initialises connection pool
-  getFirebaseApp();    // validates Firebase credentials
+  getFirebaseApp(); // validates Firebase credentials
 
   const app = createApp();
   const httpServer = http.createServer(app);
@@ -33,7 +31,7 @@ async function bootstrap(): Promise<void> {
   });
 
   // Expose io so gateways can import it later
-  // (registered in Phase 5 when messaging is built)
+  // (registered in Phase 7 when messaging is built)
   app.set('io', io);
 
   // ─── HTTP server ───────────────────────────────────────────────────────
@@ -45,7 +43,7 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (signal: string) => {
     logger.info(`Received ${signal} — shutting down gracefully`);
     httpServer.close(async () => {
-      await Promise.all([disconnectDatabase(), disconnectRedis()]);
+      await disconnectDatabase();
       logger.info('Shutdown complete');
       process.exit(0);
     });
