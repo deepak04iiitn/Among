@@ -27,6 +27,7 @@ import {
   adminReportsRouter,
   adminUsersRouter,
 } from './modules/moderation/moderation.routes';
+import { notificationsRouter } from './modules/notifications/notification.routes';
 
 export function createApp(): express.Application {
   const app = express();
@@ -88,6 +89,7 @@ export function createApp(): express.Application {
   app.use('/api/users/me/blocks', blocksRouter);
   app.use('/api/admin/reports', adminReportsRouter);
   app.use('/api/admin/users', adminUsersRouter);
+  app.use('/api/notifications', notificationsRouter);
 
   // ─── 404 handler ─────────────────────────────────────────────────────────
   app.use((_req: Request, res: Response) => {
