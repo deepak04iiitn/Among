@@ -6,6 +6,9 @@ import { ROUTES } from '../../../constants/routes';
 import AppShell from '../../../components/layout/AppShell';
 import Breadcrumb from '../../../components/layout/Breadcrumb';
 
+// ISR: revalidate every 5 minutes (FR-SEO-1)
+export const revalidate = 300;
+
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Lora } from 'next/font/google';
 import ReduxProvider from '../components/providers/ReduxProvider';
+import SkipToMain from '../components/layout/SkipToMain';
 import './globals.css';
 
 // ─── Fonts — self-served via next/font ─────────────────────────────────────
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           All server components inside can still be server components — they
           simply don't call useSelector/useDispatch themselves.
         */}
+        <SkipToMain />
         <ReduxProvider>
           {children}
         </ReduxProvider>
