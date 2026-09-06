@@ -28,6 +28,7 @@ import {
   adminUsersRouter,
 } from './modules/moderation/moderation.routes';
 import { notificationsRouter } from './modules/notifications/notification.routes';
+import { adminAnalyticsRouter, adminConfigRouter } from './modules/admin/adminAnalytics.routes';
 
 export function createApp(): express.Application {
   const app = express();
@@ -90,6 +91,8 @@ export function createApp(): express.Application {
   app.use('/api/admin/reports', adminReportsRouter);
   app.use('/api/admin/users', adminUsersRouter);
   app.use('/api/notifications', notificationsRouter);
+  app.use('/api/admin/analytics', adminAnalyticsRouter);
+  app.use('/api/admin/config', adminConfigRouter);
 
   // ─── 404 handler ─────────────────────────────────────────────────────────
   app.use((_req: Request, res: Response) => {
