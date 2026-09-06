@@ -110,6 +110,17 @@ describe('Redux store', () => {
     });
   });
 
+  it('initializes with correct SNY initial state', () => {
+    expect(state.sny).toEqual({
+      prompt:            null,
+      promptStatus:      null,
+      experienceHistory: [],
+      acceptedContext:   null,
+      status:            'idle',
+      error:             null,
+    });
+  });
+
   it('initializes with all feature flags off', () => {
     const { flags, loaded } = state.featureFlags;
     expect(loaded).toBe(false);

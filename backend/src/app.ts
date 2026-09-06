@@ -20,6 +20,7 @@ import { postsRouter } from './modules/posts/post.routes';
 import { reactionsRouter } from './modules/reactions/reaction.routes';
 import { discoveryRouter } from './modules/discovery/discovery.routes';
 import { conversationsRouter } from './modules/conversations/conversation.routes';
+import { snyRouter } from './modules/someoneNeedsYou/someoneNeedsYou.routes';
 
 export function createApp(): express.Application {
   const app = express();
@@ -76,6 +77,7 @@ export function createApp(): express.Application {
   app.use('/api/posts/:postId/reactions', reactionsRouter);
   app.use('/api/discovery', discoveryRouter);
   app.use('/api/conversations', conversationsRouter);
+  app.use('/api/sny', snyRouter);
 
   // ─── 404 handler ─────────────────────────────────────────────────────────
   app.use((_req: Request, res: Response) => {

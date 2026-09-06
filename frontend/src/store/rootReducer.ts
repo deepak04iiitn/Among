@@ -7,6 +7,7 @@ import discoveryReducer from '../features/discovery/discoverySlice';
 import conversationsReducer from '../features/conversations/conversationsSlice';
 import notificationsReducer from '../features/notifications/notificationsSlice';
 import featureFlagsReducer from '../features/featureFlags/featureFlagsSlice';
+import snyReducer from '../features/someoneNeedsYou/snySlice';
 
 /**
  * Root reducer — combines all feature slice reducers.
@@ -21,6 +22,7 @@ export const rootReducer = combineReducers({
   conversations: conversationsReducer,
   notifications: notificationsReducer,
   featureFlags:  featureFlagsReducer,
+  sny:           snyReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
