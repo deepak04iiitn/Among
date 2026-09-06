@@ -56,6 +56,8 @@ jest.mock('../../middleware/rateLimiter.middleware', () => ({
   reactionRateLimiter:       (_req: unknown, _res: unknown, next: () => void) => next(),
   conversationRateLimiter:   (_req: unknown, _res: unknown, next: () => void) => next(),
   createRateLimiter:         () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  postRateLimiter:           (_req: unknown, _res: unknown, next: () => void) => next(),
+  reportRateLimiter:         (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 import {

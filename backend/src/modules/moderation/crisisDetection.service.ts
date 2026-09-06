@@ -11,13 +11,22 @@
  * Pattern definitions live in `backend/src/constants/crisisPatterns.ts`.
  */
 import { CRISIS_PATTERN_SETS } from '../../constants/crisisPatterns';
-import type { CrisisType } from '../../constants/crisisResources';
+import {
+  getCrisisResources as _getCrisisResources,
+  CRISIS_TYPE,
+  type CrisisType,
+  type CrisisResource,
+} from '../../constants/crisisResources';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface CrisisResult {
   readonly isCrisis:   boolean;
   readonly crisisType: CrisisType | null;
+}
+
+export interface CrisisResultWithResources extends CrisisResult {
+  readonly resources: readonly CrisisResource[];
 }
 
 // ─── Service ─────────────────────────────────────────────────────────────────
@@ -44,5 +53,37 @@ export function detectCrisisContent(text: string): CrisisResult {
   } catch {
     // Must never throw — safety net
     return { isCrisis: false, crisisType: null };
+  }
+}
+
+/**
+ * Detect crisis content AND return the appropriate resources.
+ * Always returns a safe result — never throws.
+ * Resources are sourced from `crisisResources.ts` constants — never hardcoded here.
+ */
+export function detectCrisisContentWithResources(text: string): CrisisResultWithResources {
+  try {
+    const result = detectCrisisContent(text);
+    const crisisType = result.crisisType ?? CRISIS_TYPE.GENERAL;
+    return {
+      ...result,
+      resources: result.isCrisis ? _getCrisisResources(crisisType) : [],
+    };
+  } catch {
+    // Safety net — must never throw
+    return { isCrisis: false, crisisType: null, resources: [] };
+  }
+}
+
+/**
+ * Get crisis resources for a given crisis type.
+ * Falls back to GENERAL if type is unknown.
+ * NEVER throws.
+ */
+export function getCrisisResources(crisisType?: CrisisType | null): readonly CrisisResource[] {
+  try {
+    return _getCrisisResources(crisisType ?? CRISIS_TYPE.GENERAL);
+  } catch {
+    return _getCrisisResources(CRISIS_TYPE.GENERAL);
   }
 }

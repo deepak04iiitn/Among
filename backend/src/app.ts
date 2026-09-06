@@ -21,6 +21,12 @@ import { reactionsRouter } from './modules/reactions/reaction.routes';
 import { discoveryRouter } from './modules/discovery/discovery.routes';
 import { conversationsRouter } from './modules/conversations/conversation.routes';
 import { snyRouter } from './modules/someoneNeedsYou/someoneNeedsYou.routes';
+import {
+  reportsRouter,
+  blocksRouter,
+  adminReportsRouter,
+  adminUsersRouter,
+} from './modules/moderation/moderation.routes';
 
 export function createApp(): express.Application {
   const app = express();
@@ -78,6 +84,10 @@ export function createApp(): express.Application {
   app.use('/api/discovery', discoveryRouter);
   app.use('/api/conversations', conversationsRouter);
   app.use('/api/sny', snyRouter);
+  app.use('/api/reports', reportsRouter);
+  app.use('/api/users/me/blocks', blocksRouter);
+  app.use('/api/admin/reports', adminReportsRouter);
+  app.use('/api/admin/users', adminUsersRouter);
 
   // ─── 404 handler ─────────────────────────────────────────────────────────
   app.use((_req: Request, res: Response) => {
