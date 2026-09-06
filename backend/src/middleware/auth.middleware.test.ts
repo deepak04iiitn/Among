@@ -30,7 +30,8 @@ const MOCK_DB_USER = {
   _id: 'account-id-123',
   firebaseUid: MOCK_DECODED_TOKEN.uid,
   role: USER_ROLE.USER,
-  isBanned: false,
+  // New model structure: isBanned lives inside enforcementStatus
+  enforcementStatus: { isBanned: false },
   hasCompletedOnboarding: true,
 };
 
@@ -39,7 +40,7 @@ describe('requireAuth', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockVerify.mockResolvedValue(MOCK_DECODED_TOKEN as never);
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(MOCK_DB_USER) });
+    (mockFindOne as jest.Mock).mockResolvedValue(MOCK_DB_USER);
   });
 
   it('attaches user to req on valid token', async () => {
@@ -87,7 +88,7 @@ describe('requireAuth', () => {
   });
 
   it('calls next with UnauthorizedError when account not found in DB', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(null) });
+    (mockFindOne as jest.Mock).mockResolvedValue(null);
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
     await requireAuth(req, mockResponse(), next);
@@ -97,8 +98,9 @@ describe('requireAuth', () => {
   });
 
   it('calls next with ForbiddenError when account is banned', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({
-      lean: () => Promise.resolve({ ...MOCK_DB_USER, isBanned: true }),
+    (mockFindOne as jest.Mock).mockResolvedValue({
+      ...MOCK_DB_USER,
+      enforcementStatus: { isBanned: true },
     });
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
@@ -192,7 +194,7 @@ describe('optionalAuth', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockVerify.mockResolvedValue(MOCK_DECODED_TOKEN as never);
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(MOCK_DB_USER) });
+    (mockFindOne as jest.Mock).mockResolvedValue(MOCK_DB_USER);
   });
 
   it('attaches user when valid token is present', async () => {
@@ -221,8 +223,9 @@ describe('optionalAuth', () => {
   });
 
   it('does not attach banned user', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({
-      lean: () => Promise.resolve({ ...MOCK_DB_USER, isBanned: true }),
+    (mockFindOne as jest.Mock).mockResolvedValue({
+      ...MOCK_DB_USER,
+      enforcementStatus: { isBanned: true },
     });
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();

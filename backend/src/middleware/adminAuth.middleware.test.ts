@@ -16,7 +16,7 @@ function makeDbUser(role: string) {
     _id: 'acct-123',
     firebaseUid: MOCK_DECODED_TOKEN.uid,
     role,
-    isBanned: false,
+    enforcementStatus: { isBanned: false },
     hasCompletedOnboarding: true,
   };
 }
@@ -28,7 +28,7 @@ describe('requireModerator', () => {
   });
 
   it('passes for MODERATOR role', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(makeDbUser(USER_ROLE.MODERATOR)) });
+    (mockFindOne as jest.Mock).mockResolvedValue(makeDbUser(USER_ROLE.MODERATOR));
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
     await requireModerator(req, mockResponse(), next);
@@ -36,7 +36,7 @@ describe('requireModerator', () => {
   });
 
   it('passes for ADMIN role (exceeds minimum)', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(makeDbUser(USER_ROLE.ADMIN)) });
+    (mockFindOne as jest.Mock).mockResolvedValue(makeDbUser(USER_ROLE.ADMIN));
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
     await requireModerator(req, mockResponse(), next);
@@ -44,7 +44,7 @@ describe('requireModerator', () => {
   });
 
   it('rejects USER role with ForbiddenError', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(makeDbUser(USER_ROLE.USER)) });
+    (mockFindOne as jest.Mock).mockResolvedValue(makeDbUser(USER_ROLE.USER));
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
     await requireModerator(req, mockResponse(), next);
@@ -61,7 +61,7 @@ describe('requireAdmin', () => {
   });
 
   it('passes for ADMIN role only', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(makeDbUser(USER_ROLE.ADMIN)) });
+    (mockFindOne as jest.Mock).mockResolvedValue(makeDbUser(USER_ROLE.ADMIN));
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
     await requireAdmin(req, mockResponse(), next);
@@ -69,7 +69,7 @@ describe('requireAdmin', () => {
   });
 
   it('rejects MODERATOR role with ForbiddenError', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(makeDbUser(USER_ROLE.MODERATOR)) });
+    (mockFindOne as jest.Mock).mockResolvedValue(makeDbUser(USER_ROLE.MODERATOR));
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
     await requireAdmin(req, mockResponse(), next);
@@ -78,7 +78,7 @@ describe('requireAdmin', () => {
   });
 
   it('rejects USER role with ForbiddenError', async () => {
-    (mockFindOne as jest.Mock).mockReturnValue({ lean: () => Promise.resolve(makeDbUser(USER_ROLE.USER)) });
+    (mockFindOne as jest.Mock).mockResolvedValue(makeDbUser(USER_ROLE.USER));
     const req = mockRequest({ headers: { authorization: `Bearer ${MOCK_ID_TOKEN}` } });
     const next = mockNext();
     await requireAdmin(req, mockResponse(), next);

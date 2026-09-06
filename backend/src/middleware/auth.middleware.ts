@@ -29,12 +29,13 @@ export async function requireAuth(
 
     const decoded = await verifyFirebaseToken(idToken);
 
-    const account = await UserModel.findOne({ firebaseUid: decoded.uid }).lean();
+    const account = await UserModel.findOne({ firebaseUid: decoded.uid });
     if (!account) {
       throw new UnauthorizedError('Account not found');
     }
 
-    if (account.isBanned) {
+    const banned = account.enforcementStatus?.isBanned ?? false;
+    if (banned) {
       throw new ForbiddenError('Account is banned');
     }
 
@@ -42,7 +43,7 @@ export async function requireAuth(
       accountId: String(account._id),
       firebaseUid: account.firebaseUid,
       role: account.role,
-      isBanned: account.isBanned,
+      isBanned: banned,
       hasCompletedOnboarding: account.hasCompletedOnboarding,
     };
 
@@ -112,13 +113,14 @@ export async function optionalAuth(
       return;
     }
     const decoded = await verifyFirebaseToken(idToken);
-    const account = await UserModel.findOne({ firebaseUid: decoded.uid }).lean();
-    if (account && !account.isBanned) {
+    const account = await UserModel.findOne({ firebaseUid: decoded.uid });
+    const isBanned = account?.enforcementStatus?.isBanned ?? false;
+    if (account && !isBanned) {
       req.user = {
         accountId: String(account._id),
         firebaseUid: account.firebaseUid,
         role: account.role,
-        isBanned: account.isBanned,
+        isBanned,
         hasCompletedOnboarding: account.hasCompletedOnboarding,
       };
     }

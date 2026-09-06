@@ -1,13 +1,16 @@
 import AppShell from '../../components/layout/AppShell';
+import OnboardingGuard from '../../components/auth/OnboardingGuard';
 
 /**
- * Auth/onboarding layout — no footer, navigation is simplified.
- * The onboarding flow takes the full viewport for focus.
+ * Auth/onboarding layout — no footer, no navigation (full-viewport focus).
+ * Route guard: redirects already-onboarded users to /home.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AppShell showFooter={false} showNav={false}>
-      {children}
-    </AppShell>
+    <OnboardingGuard>
+      <AppShell showFooter={false} showNav={false}>
+        {children}
+      </AppShell>
+    </OnboardingGuard>
   );
 }
