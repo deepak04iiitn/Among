@@ -39,6 +39,11 @@ describe('Redux store', () => {
       status:         'idle',
       error:          null,
       seenPostIds:    [],
+      byId:           {},
+      myPosts:        [],
+      draftPost:      null,
+      submitting:     false,
+      composeError:   null,
     });
   });
 

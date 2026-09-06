@@ -43,11 +43,17 @@ jest.mock('../../middleware/auth.middleware', () => ({
     _res: import('express').Response,
     next: import('express').NextFunction
   ) => next(),
+  optionalAuth: (
+    _req: import('express').Request,
+    _res: import('express').Response,
+    next: import('express').NextFunction
+  ) => next(),
 }));
 
 jest.mock('../../middleware/rateLimiter.middleware', () => ({
   globalRateLimiter:         (_req: unknown, _res: unknown, next: () => void) => next(),
   aliasRotationRateLimiter:  (_req: unknown, _res: unknown, next: () => void) => next(),
+  createRateLimiter:         () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 import {

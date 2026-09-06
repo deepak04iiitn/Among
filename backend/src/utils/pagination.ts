@@ -20,6 +20,30 @@ export interface CursorPage<T> {
 }
 
 /**
+ * Encode an arbitrary cursor payload as a URL-safe base64 string.
+ */
+export function encodeCursor(payload: Record<string, unknown>): string {
+  return Buffer.from(JSON.stringify(payload)).toString('base64url');
+}
+
+/**
+ * Decode a base64url cursor string back to its payload.
+ * Returns `null` if the string is invalid or malformed.
+ */
+export function decodeCursor(cursor: string): Record<string, unknown> | null {
+  try {
+    const json = Buffer.from(cursor, 'base64url').toString('utf-8');
+    const parsed: unknown = JSON.parse(json);
+    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Builds a cursor page response from a raw query result.
  * Pass (limit + 1) items to the query to detect if more pages exist.
  */

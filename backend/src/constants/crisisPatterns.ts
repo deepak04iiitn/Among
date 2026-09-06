@@ -17,7 +17,7 @@ export const SELF_HARM_PATTERNS: readonly RegExp[] = [
   /\b(going to|want to|planning to|about to|will)\s+(kill|hurt|harm)\s+(my)?self\b/i,
   /\b(suicide|suicidal)\s+(plan|attempt|method|note)\b/i,
   /\b(end\s+my\s+life|take\s+my\s+own\s+life)\b/i,
-  /\bnot\s+want\s+to\s+(be\s+here|exist|live)\s+anymore\b/i,
+  /\b(don'?t|do\s+not|not)\s+want(ing)?\s+to\s+(be\s+here|exist|live)\s+anymore\b/i,
   /\b(overdose\s+on|methods?\s+(to|for)\s+(die|kill))\b/i,
 ];
 

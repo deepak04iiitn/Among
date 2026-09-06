@@ -8,14 +8,17 @@ import {
   postSameCountUpdated,
   postSaveToggled,
   feedCleared,
+  postAdded,
   selectPrimaryPost,
   selectSecondaryPosts,
   selectPostsStatus,
   selectPostsError,
   selectNextCursor,
   selectPostById,
+  type FeedPost,
   type Post,
 } from './postsSlice';
+import { POST_EXPERIENCE_STATE, POST_VISIBILITY } from '../../constants/postStates';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -23,7 +26,8 @@ function makeStore() {
   return configureStore({ reducer: rootReducer });
 }
 
-const mockPost = (overrides?: Partial<Post>): Post => ({
+/** Feed card fixture (FeedPost shape) */
+const mockPost = (overrides?: Partial<FeedPost>): FeedPost => ({
   id: 'p1',
   body: 'I lost my job today.',
   categoryId: 'work',
@@ -37,6 +41,24 @@ const mockPost = (overrides?: Partial<Post>): Post => ({
   isOwn: false,
   hasReacted: false,
   hasSaved: false,
+  ...overrides,
+});
+
+/** Full post fixture (Post shape) — for byId tests */
+const mockFullPost = (overrides?: Partial<Post>): Post => ({
+  id: 'p1',
+  body: 'I lost my job today.',
+  categoryIds: ['work'],
+  state: POST_EXPERIENCE_STATE.CURRENT,
+  visibilityScope: POST_VISIBILITY.BROAD,
+  status: 'published',
+  authorAlias: 'Blue Fox',
+  authorAvatarSeed: 'seed-1',
+  publishedAt: '2026-01-01T00:00:00.000Z',
+  editableUntil: '2026-01-01T00:15:00.000Z',
+  editedAt: null,
+  reactionCounts: { current: 0, past: 0, considering: 0, same: 0, iUnderstand: 0, iLearned: 0, iDisagree: 0, tellMeMore: 0 },
+  isOwnPost: false,
   ...overrides,
 });
 
@@ -221,18 +243,18 @@ describe('feedCleared', () => {
 // ─── selectPostById ──────────────────────────────────────────────────────────
 
 describe('selectPostById', () => {
-  it('returns primaryPost by id', () => {
+  it('returns a full post from byId map', () => {
     const store = makeStore();
-    const post = mockPost({ id: 'p1' });
-    store.dispatch(feedLoaded({ primaryPost: post, secondaryPosts: [], nextCursor: null }));
+    const post = mockFullPost({ id: 'p1' });
+    store.dispatch(postAdded(post));
     expect(selectPostById('p1')(store.getState())).toEqual(post);
   });
 
-  it('returns secondary post by id', () => {
+  it('returns another full post by its id', () => {
     const store = makeStore();
-    const secondary = mockPost({ id: 'p2' });
-    store.dispatch(feedLoaded({ primaryPost: null, secondaryPosts: [secondary], nextCursor: null }));
-    expect(selectPostById('p2')(store.getState())).toEqual(secondary);
+    const post = mockFullPost({ id: 'p2' });
+    store.dispatch(postAdded(post));
+    expect(selectPostById('p2')(store.getState())).toEqual(post);
   });
 
   it('returns undefined for unknown id', () => {

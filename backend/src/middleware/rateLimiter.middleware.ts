@@ -31,6 +31,27 @@ function makeLimiter(options: {
   });
 }
 
+/**
+ * Generic factory for creating custom rate limiters.
+ * Use for route-specific limiters that don't need a shared name.
+ */
+export function createRateLimiter(options: {
+  windowMs: number;
+  max: number;
+  errorCode?: ErrorCode;
+  message?: string;
+}): RateLimitRequestHandler {
+  const limiterOptions: Parameters<typeof makeLimiter>[0] = {
+    windowMs:  options.windowMs,
+    max:       options.max,
+    errorCode: options.errorCode ?? 'ERR_RATE_LIMITED',
+  };
+  if (options.message !== undefined) {
+    limiterOptions.message = options.message;
+  }
+  return makeLimiter(limiterOptions);
+}
+
 // ─── Named limiters ───────────────────────────────────────────────────────────
 
 /** 1 post per 24-hour rolling window */

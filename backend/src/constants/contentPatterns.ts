@@ -7,7 +7,7 @@
  */
 export const CRITICAL_CONTENT_PATTERNS: readonly RegExp[] = [
   // Explicit illegal solicitation patterns (narrow, high-confidence only)
-  /\b(buy|sell|purchase)\s+(drugs?|cocaine|heroin|meth|fentanyl)\b/i,
+  /\b(buy|buys|buying|sell|sells|selling|purchase|purchases|purchasing)\s+(drugs?|cocaine|heroin|meth|fentanyl)\b/i,
   // CSAM references (any mention is critical)
   /\b(child\s+porn|cp\s+for\s+sale|underage\s+explicit)\b/i,
 ];
@@ -16,8 +16,8 @@ export const CRITICAL_CONTENT_PATTERNS: readonly RegExp[] = [
  * Patterns that constitute WARNINGS — post is allowed but safety reminder shown.
  */
 export const WARNING_CONTENT_PATTERNS: readonly RegExp[] = [
-  // Phone numbers — various formats
-  /(\+?\d[\s\-.]?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4})/,
+  // Phone numbers — various formats (10 digits min: NXX-NXX-XXXX or with country code)
+  /(\+?\d{1,3}[\s\-.]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}/,
   // Email addresses
   /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/,
   // Social handles (@ preceded by non-word char or start of string)
