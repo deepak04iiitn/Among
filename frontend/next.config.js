@@ -1,6 +1,5 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Strict mode enforces React best practices
   reactStrictMode: true,
 
@@ -23,11 +22,11 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options',           value: 'DENY' },
+          { key: 'X-Content-Type-Options',     value: 'nosniff' },
+          { key: 'Referrer-Policy',            value: 'strict-origin-when-cross-origin' },
           {
-            key: 'Permissions-Policy',
+            key:   'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
         ],
@@ -40,13 +39,13 @@ const nextConfig: NextConfig = {
     if (process.env['NODE_ENV'] !== 'production') return [];
     return [
       {
-        source: '/(.*)',
-        has: [{ type: 'host', value: 'www.among.io' }],
+        source:      '/(.*)',
+        has:         [{ type: 'host', value: 'www.among.io' }],
         destination: 'https://among.io/:path*',
-        permanent: true,
+        permanent:   true,
       },
     ];
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

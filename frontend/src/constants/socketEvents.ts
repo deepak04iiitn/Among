@@ -1,5 +1,32 @@
 // MIRRORED — keep in sync with backend/src/constants/socketEvents.ts
 
+/**
+ * Unified socket event map for socketClient.ts.
+ * Includes lifecycle events (connect/disconnect) + domain events.
+ */
+export const SOCKET_EVENT = {
+  // ── Socket.IO lifecycle ────────────────────────────────────────
+  CONNECT:    'connect',
+  DISCONNECT: 'disconnect',
+  ERROR:      'error',
+
+  // ── Client → Server ───────────────────────────────────────────
+  CONVERSATION_JOIN:  'client:join_conversation',
+  CONVERSATION_LEAVE: 'client:leave_conversation',
+  MESSAGE_SEND:       'client:send_message',
+  CONVERSATION_END:   'client:end_conversation',
+
+  // ── Server → Client ───────────────────────────────────────────
+  MESSAGE_RECEIVED:            'server:message_received',
+  CONVERSATION_STATE_CHANGED:  'server:conversation_state_changed',
+  EXPIRY_WARNING:              'server:expiry_warning',
+  CONTACT_INFO_WARNING:        'server:contact_info_warning',
+  MATCH_FOUND:                 'server:match_found',
+  MATCH_EXPIRED:               'server:match_expired',
+} as const;
+
+export type SocketEventName = (typeof SOCKET_EVENT)[keyof typeof SOCKET_EVENT];
+
 export const SERVER_SOCKET_EVENT = {
   MESSAGE_RECEIVED: 'server:message_received',
   CONVERSATION_STATE_CHANGED: 'server:conversation_state_changed',

@@ -1,89 +1,105 @@
 /* ─── AMONG Design System — CSS Custom Properties ──────────────────────────── */
 /* All design tokens live here. Never use raw values in components.             */
+/* Phase 2B: indigo accent, pure-white background, editorial aesthetic.         */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  /* ─── Light mode (default) ─────────────────────────────────────────────── */
+  /* ─── Color tokens ─────────────────────────────────────────────────────── */
   :root {
-    /* Background */
-    --color-bg:         0 0% 98%;          /* Off-white — soft, not harsh */
-    --color-bg-subtle:  0 0% 95%;          /* Slightly recessed surfaces */
+    /* Surfaces */
+    --color-bg:            #FFFFFF;
+    --color-bg-subtle:     #FAFAFA;   /* innermost nested surfaces — use sparingly */
 
     /* Text */
-    --color-text:              220 15% 8%;  /* Near-black with warmth */
-    --color-text-secondary:    220 10% 35%; /* Secondary label color */
-    --color-text-muted:        220 10% 55%; /* Hint text, placeholders */
-
-    /* Accent — terracotta/clay */
-    --color-accent:            15 65% 45%;
-    --color-accent-subtle:     15 60% 93%;
-    --color-accent-foreground: 0 0% 100%;
+    --color-text:          #111111;
+    --color-text-secondary:#555555;
+    --color-text-muted:    #999999;
 
     /* Borders */
-    --color-border:       220 13% 88%;
-    --color-border-strong: 220 13% 70%;
+    --color-border:        #E8E8E8;
+    --color-border-strong: #D0D0D0;
 
-    /* Semantic */
-    --color-error: 0 72% 51%;
-    --color-warn:  38 92% 50%;
-    --color-ok:    142 71% 45%;
+    /* Accent — single indigo, no other accent color in the product */
+    --color-accent:        #4F46E5;
+    --color-accent-hover:  #4338CA;
+    --color-accent-subtle: #EEF2FF;  /* ONLY for focus rings + very light selected states */
+
+    /* Semantic — muted / desaturated, never saturated "alert" colors */
+    --color-error: #C0392B;
+    --color-warn:  #B7791F;
+    --color-ok:    #276749;
+    --color-info:  #2B6CB0;
 
     /* ─── Border radii ───────────────────────────────────────────────────── */
-    --radius-sm:   3px;
-    --radius-md:   6px;
-    --radius-lg:   12px;
-    --radius-xl:   20px;
+    --radius-sm:   6px;
+    --radius-md:   10px;
+    --radius-lg:   16px;
+    --radius-xl:   24px;
     --radius-pill: 9999px;
-  }
 
-  /* ─── Dark mode ────────────────────────────────────────────────────────── */
-  .dark {
-    --color-bg:         220 16% 9%;
-    --color-bg-subtle:  220 16% 13%;
+    /* ─── Motion tokens ──────────────────────────────────────────────────── */
+    --duration-instant: 80ms;
+    --duration-fast:    150ms;
+    --duration-normal:  250ms;
+    --duration-slow:    400ms;
+    --duration-reveal:  600ms;
+    --ease-standard:    cubic-bezier(0.25, 0.1, 0.25, 1);
+    --ease-out:         cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out:      cubic-bezier(0.4, 0, 0.2, 1);
 
-    --color-text:              0 0% 95%;
-    --color-text-secondary:    220 8% 65%;
-    --color-text-muted:        220 8% 45%;
-
-    --color-accent:            15 70% 58%;
-    --color-accent-subtle:     15 60% 18%;
-    --color-accent-foreground: 220 16% 9%;
-
-    --color-border:       220 14% 20%;
-    --color-border-strong: 220 14% 35%;
-
-    --color-error: 0 72% 65%;
-    --color-warn:  38 92% 65%;
-    --color-ok:    142 71% 55%;
+    /* ─── shadcn/ui compatibility aliases (HSL format required by shadcn) ── */
+    /* These mirror the hex tokens above and are used by shadcn primitives.   */
+    --background:       0 0% 100%;
+    --foreground:       0 0% 7%;
+    --card:             0 0% 98%;
+    --card-foreground:  0 0% 7%;
+    --popover:          0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+    --primary:          0 0% 7%;
+    --primary-foreground: 0 0% 100%;
+    --secondary:        0 0% 98%;
+    --secondary-foreground: 0 0% 7%;
+    --muted:            0 0% 98%;
+    --muted-foreground: 0 0% 60%;
+    --accent:           243 75% 59%;
+    --accent-foreground: 0 0% 100%;
+    --destructive:      4 67% 47%;
+    --destructive-foreground: 0 0% 100%;
+    --border:           0 0% 91%;
+    --input:            0 0% 91%;
+    --ring:             243 75% 59%;
+    --radius:           0.625rem; /* 10px — matches --radius-md */
   }
 
   /* ─── Base reset ────────────────────────────────────────────────────────── */
   * {
-    border-color: hsl(var(--color-border));
+    border-color: var(--color-border);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
   }
 
   html {
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
+    font-size: 16px;
   }
 
   body {
-    background-color: hsl(var(--color-bg));
-    color: hsl(var(--color-text));
+    background-color: var(--color-bg);
+    color: var(--color-text);
     font-family: var(--font-ui, system-ui, sans-serif);
     font-size: 1rem;
     line-height: 1.65;
     min-height: 100dvh;
   }
 
-  /* ─── Focus styles ──────────────────────────────────────────────────────── */
+  /* ─── Focus styles — always indigo, always accessible ─────────────────── */
   :focus-visible {
-    outline: 2px solid hsl(var(--color-accent));
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
@@ -91,80 +107,201 @@
   /* ─── Typography ────────────────────────────────────────────────────────── */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-editorial, Georgia, serif);
+    color: var(--color-text);
     line-height: 1.1;
     letter-spacing: -0.02em;
-    color: hsl(var(--color-text));
+    font-weight: 400;
   }
 
   /* ─── Selection ─────────────────────────────────────────────────────────── */
   ::selection {
-    background-color: hsl(var(--color-accent-subtle));
-    color: hsl(var(--color-text));
+    background-color: var(--color-accent-subtle);
+    color: var(--color-text);
   }
 
-  /* ─── Scrollbar ─────────────────────────────────────────────────────────── */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--color-border-strong));
+  /* ─── Scrollbar — minimal, unobtrusive ──────────────────────────────────── */
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  {
+    background-color: var(--color-border-strong);
     border-radius: var(--radius-pill);
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--color-text-muted); }
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────────────────── */
+/* ALL keyframes live here — never inline keyframes in component files.          */
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(12px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* Hero word stagger — each word fades in from below */
+  @keyframes wordReveal {
+    0%   { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* Alias reveal — avatar path drawing */
+  @keyframes avatarDraw {
+    from { stroke-dashoffset: 1000; }
+    to   { stroke-dashoffset: 0; }
+  }
+
+  /* Count update — outgoing number exits up, incoming enters from below */
+  @keyframes countOut {
+    from { transform: translateY(0);    opacity: 1; }
+    to   { transform: translateY(-4px); opacity: 0; }
+  }
+  @keyframes countIn {
+    from { transform: translateY(4px);  opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* Overlay fade for alias reveal backdrop */
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes overlayOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+
+  /* Skeleton pulse */
+  @keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.45; }
+  }
+
+  /* Route transition */
+  @keyframes pageEnter {
+    from { transform: translateY(8px); opacity: 0; }
+    to   { transform: translateY(0);   opacity: 1; }
   }
 }
 
-/* ─── AMONG-specific utility classes ─────────────────────────────────────── */
+/* ─── AMONG utility classes ──────────────────────────────────────────────────── */
 @layer utilities {
-  /* Thin rule — editorial page divider */
-  .rule {
-    @apply border-t border-border;
+  /* ── Layout ── */
+  .content-column  { @apply max-w-2xl mx-auto w-full px-5 md:px-8; }
+  .reading-column  { @apply max-w-[65ch] mx-auto w-full; }
+  .page-section    { @apply py-12 md:py-16; }
+
+  /* ── Thin editorial rule ── */
+  .rule            { @apply border-t border-[var(--color-border)]; }
+
+  /* ── Skeleton ── */
+  .skeleton        {
+    background-color: var(--color-border);
+    border-radius: var(--radius-sm);
+    animation: skeletonPulse 1.6s ease-in-out infinite;
   }
 
-  /* Prose container — constrains reading width */
-  .prose-container {
-    @apply max-w-reading mx-auto;
-  }
-
-  /* Category chip */
-  .category-chip {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 text-caption
-           rounded-sm bg-bg-subtle border border-border text-text-secondary
-           transition-colors hover:border-border-strong;
-  }
-
-  /* Reaction button base */
+  /* ── SAME / reaction button ── */
   .reaction-btn {
-    @apply flex items-center gap-1.5 px-3 py-1.5 text-ui rounded-md
-           border border-border bg-transparent text-text-secondary
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5
+           rounded-[var(--radius-pill)] border border-[var(--color-border)]
+           bg-transparent text-[var(--color-text-secondary)] text-sm
            transition-all duration-150
-           hover:border-accent hover:text-accent hover:bg-accent-subtle
-           focus-visible:ring-1 focus-visible:ring-accent;
+           hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)]
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)];
   }
   .reaction-btn[aria-pressed="true"] {
-    @apply border-accent text-accent bg-accent-subtle;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background-color: var(--color-accent-subtle);
   }
 
-  /* Post card — base container */
+  /* ── Post card ── */
   .post-card {
-    @apply border-b border-border py-8 transition-colors duration-200;
-  }
-  .post-card:hover {
-    @apply border-border-strong;
+    @apply border-b border-[var(--color-border)] py-8
+           transition-colors duration-200;
   }
 
-  /* Text balance for headlines */
-  .text-balance {
-    text-wrap: balance;
+  /* ── Category chip (typographic only — no color fill) ── */
+  .category-chip {
+    @apply inline-flex items-center gap-1 px-3 py-1
+           rounded-[var(--radius-pill)] border border-[var(--color-border)]
+           text-[0.875rem] text-[var(--color-text-secondary)]
+           transition-colors duration-150
+           hover:border-[var(--color-border-strong)];
+  }
+  .category-chip[aria-pressed="true"],
+  .category-chip[data-selected="true"] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background-color: var(--color-accent-subtle);
   }
 
-  /* Animated word reveal — apply per word */
+  /* ── Pill button variants ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-[var(--radius-pill)] px-6 py-2.5
+           bg-[var(--color-text)] text-[var(--color-bg)]
+           text-[0.875rem] font-medium
+           transition-all duration-[var(--duration-fast)]
+           hover:opacity-85 active:scale-[0.98]
+           focus-visible:outline focus-visible:outline-2
+           focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-[var(--radius-pill)] px-6 py-2.5
+           border border-[var(--color-border)]
+           bg-transparent text-[var(--color-text)]
+           text-[0.875rem] font-medium
+           transition-all duration-[var(--duration-fast)]
+           hover:bg-[var(--color-text)] hover:text-[var(--color-bg)]
+           active:scale-[0.98]
+           focus-visible:outline focus-visible:outline-2
+           focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)];
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-[var(--radius-pill)] px-4 py-2
+           bg-transparent text-[var(--color-text-secondary)]
+           text-[0.875rem] font-medium
+           transition-all duration-[var(--duration-fast)]
+           hover:text-[var(--color-text)]
+           active:scale-[0.98];
+  }
+
+  /* ── Word reveal for hero animation ── */
   .word-reveal {
     @apply inline-block overflow-hidden;
   }
   .word-reveal > span {
-    @apply animate-wordStagger;
+    @apply inline-block;
+    animation: wordReveal var(--duration-reveal) var(--ease-out) both;
+  }
+
+  /* ── Page enter animation ── */
+  .page-enter {
+    animation: pageEnter var(--duration-slow) var(--ease-out) both;
+  }
+
+  /* ── Text balance for headlines ── */
+  .text-balance    { text-wrap: balance; }
+  .text-pretty     { text-wrap: pretty; }
+
+  /* ── Conversation message styles ── */
+  .msg-own   { @apply w-full text-[var(--color-text)] font-[var(--font-ui)] text-base; }
+  .msg-other {
+    @apply pl-5 border-l-2 border-[var(--color-border)]
+           text-[var(--color-text)] font-[var(--font-ui)] text-base;
+  }
+
+  /* ── Crisis banner (assertive, never dismissed < 3s) ── */
+  .crisis-banner {
+    @apply border border-[var(--color-error)] bg-[#FFF5F5]
+           text-[var(--color-error)] rounded-[var(--radius-md)] p-4;
   }
 }

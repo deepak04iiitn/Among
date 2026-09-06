@@ -24,3 +24,6 @@ export const MAX_SAVED_POSTS = 500;
 
 /** Characters remaining threshold before the counter becomes visible in compose */
 export const COMPOSE_COUNTER_VISIBLE_THRESHOLD = 200;
+
+/** API request timeout in milliseconds */
+export const API_TIMEOUT_MS = 15_000;
