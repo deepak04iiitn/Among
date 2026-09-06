@@ -84,13 +84,19 @@ describe('Redux store', () => {
 
   it('initializes with correct conversations initial state', () => {
     expect(state.conversations).toEqual({
-      list:                [],
+      list:                 [],
       activeConversationId: null,
-      messages:            {},
-      messageCursors:      {},
-      listStatus:          'idle',
-      messagesStatus:      'idle',
-      error:               null,
+      activeDetail:         null,
+      messages:             {},
+      messageCursors:       {},
+      listStatus:           'idle',
+      detailStatus:         'idle',
+      messagesStatus:       'idle',
+      matchingRequestId:    null,
+      matchingState:        'idle',
+      expiryWarning:        null,
+      contactInfoWarning:   false,
+      error:                null,
     });
   });
 

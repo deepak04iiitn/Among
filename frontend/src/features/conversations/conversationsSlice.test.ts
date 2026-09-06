@@ -1,27 +1,42 @@
+/**
+ * conversationsSlice.test.ts — Unit tests for the conversations Redux slice.
+ */
 import { configureStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../store/rootReducer';
-import {
+import conversationsReducer, {
   conversationsLoading,
   conversationsLoaded,
   conversationsError,
+  conversationDetailLoaded,
+  matchingStarted,
+  matchingSucceeded,
+  matchingFailed,
+  matchingCancelled,
   activeConversationSet,
   messagesLoading,
   messagesLoaded,
   messageReceived,
   conversationStateUpdated,
-  unreadCleared,
   messageSending,
   messageSent,
   messageSendError,
+  expiryWarningReceived,
+  expiryWarningCleared,
+  contactInfoWarningShown,
+  contactInfoWarningDismissed,
   selectConversationsList,
   selectActiveConversationId,
-  selectConversationsStatus,
+  selectConversationsListStatus,
   selectMessagesStatus,
-  selectTotalUnread,
+  selectMatchingState,
+  selectMatchingRequestId,
+  selectExpiryWarning,
+  selectContactInfoWarning,
   selectConversationById,
   selectMessages,
-  type Conversation,
-  type Message,
+  type ConversationListItem,
+  type ConversationDetail,
+  type PublicMessage,
 } from './conversationsSlice';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -30,25 +45,43 @@ function makeStore() {
   return configureStore({ reducer: rootReducer });
 }
 
-const mockConversation = (overrides?: Partial<Conversation>): Conversation => ({
-  id: 'conv1',
-  experienceCategoryId: 'loneliness',
-  experienceCategoryLabel: 'Loneliness',
-  otherPartyAlias: { name: 'Red Owl', avatarSeed: 'seed-a' },
-  state: 'active',
-  startedAt: '2026-01-01T00:00:00.000Z',
-  expiresAt: '2026-01-03T00:00:00.000Z',
-  unreadCount: 0,
+const mockConversation = (overrides?: Partial<ConversationListItem>): ConversationListItem => ({
+  id:                 'conv1',
+  contextCategoryId:  'loneliness',
+  state:              'active',
+  otherAliasSnapshot: { aliasName: 'Red Owl', avatarSeed: 'seed-a' },
+  startedAt:          '2026-01-01T00:00:00.000Z',
+  endedAt:            null,
+  lastActivityAt:     '2026-01-01T00:00:00.000Z',
   ...overrides,
 });
 
-const mockMessage = (overrides?: Partial<Message>): Message => ({
-  id: 'm1',
-  body: 'Hello.',
-  senderAlias: { name: 'Red Owl', avatarSeed: 'seed-a' },
-  isOwn: false,
-  sentAt: '2026-01-01T00:00:00.000Z',
-  contactInfoWarning: false,
+const mockDetail = (overrides?: Partial<ConversationDetail>): ConversationDetail => ({
+  id:                 'conv1',
+  contextCategoryId:  'loneliness',
+  contextPostId:      null,
+  state:              'active',
+  myAliasSnapshot:    { aliasName: 'My Alias', avatarSeed: 'seed-m' },
+  otherAliasSnapshot: { aliasName: 'Red Owl', avatarSeed: 'seed-a' },
+  requestedAt:        '2026-01-01T00:00:00.000Z',
+  matchedAt:          '2026-01-01T00:01:00.000Z',
+  startedAt:          '2026-01-01T00:02:00.000Z',
+  expiresAt:          null,
+  endedAt:            null,
+  endReason:          null,
+  feedbackSubmitted:  false,
+  transcriptVisible:  false,
+  ...overrides,
+});
+
+const mockMessage = (overrides?: Partial<PublicMessage>): PublicMessage => ({
+  id:                  'm1',
+  body:                'Hello.',
+  senderAliasSnapshot: 'Red Owl',
+  senderAvatarSeed:    'seed-a',
+  contactInfoWarning:  false,
+  sentAt:              '2026-01-01T00:00:00.000Z',
+  isDeleted:           false,
   ...overrides,
 });
 
@@ -67,22 +100,32 @@ describe('conversationsSlice — initial state', () => {
 
   it('has idle listStatus', () => {
     const store = makeStore();
-    expect(selectConversationsStatus(store.getState())).toBe('idle');
+    expect(selectConversationsListStatus(store.getState())).toBe('idle');
   });
 
-  it('has totalUnread of 0', () => {
+  it('has idle matchingState', () => {
     const store = makeStore();
-    expect(selectTotalUnread(store.getState())).toBe(0);
+    expect(selectMatchingState(store.getState())).toBe('idle');
+  });
+
+  it('has no expiryWarning', () => {
+    const store = makeStore();
+    expect(selectExpiryWarning(store.getState())).toBeNull();
+  });
+
+  it('has contactInfoWarning=false', () => {
+    const store = makeStore();
+    expect(selectContactInfoWarning(store.getState())).toBe(false);
   });
 });
 
-// ─── Loading / loaded / error ─────────────────────────────────────────────────
+// ─── List loading ─────────────────────────────────────────────────────────────
 
 describe('conversationsLoading', () => {
   it('sets listStatus to loading', () => {
     const store = makeStore();
     store.dispatch(conversationsLoading());
-    expect(selectConversationsStatus(store.getState())).toBe('loading');
+    expect(selectConversationsListStatus(store.getState())).toBe('loading');
   });
 });
 
@@ -92,7 +135,7 @@ describe('conversationsLoaded', () => {
     const list = [mockConversation(), mockConversation({ id: 'conv2' })];
     store.dispatch(conversationsLoaded(list));
     expect(selectConversationsList(store.getState())).toEqual(list);
-    expect(selectConversationsStatus(store.getState())).toBe('idle');
+    expect(selectConversationsListStatus(store.getState())).toBe('idle');
   });
 });
 
@@ -100,7 +143,53 @@ describe('conversationsError', () => {
   it('sets listStatus to error', () => {
     const store = makeStore();
     store.dispatch(conversationsError('Timeout'));
-    expect(selectConversationsStatus(store.getState())).toBe('error');
+    expect(selectConversationsListStatus(store.getState())).toBe('error');
+  });
+});
+
+// ─── Detail ───────────────────────────────────────────────────────────────────
+
+describe('conversationDetailLoaded', () => {
+  it('sets activeDetail and activeConversationId', () => {
+    const store = makeStore();
+    const detail = mockDetail();
+    store.dispatch(conversationDetailLoaded(detail));
+    expect(store.getState().conversations.activeDetail?.id).toBe('conv1');
+    expect(selectActiveConversationId(store.getState())).toBe('conv1');
+  });
+});
+
+// ─── Matching ─────────────────────────────────────────────────────────────────
+
+describe('matching reducers', () => {
+  it('matchingStarted sets searching state with requestId', () => {
+    const store = makeStore();
+    store.dispatch(matchingStarted('req_1'));
+    expect(selectMatchingState(store.getState())).toBe('searching');
+    expect(selectMatchingRequestId(store.getState())).toBe('req_1');
+  });
+
+  it('matchingSucceeded sets matched and activeConversationId', () => {
+    const store = makeStore();
+    store.dispatch(matchingSucceeded('conv_match'));
+    expect(selectMatchingState(store.getState())).toBe('matched');
+    expect(selectActiveConversationId(store.getState())).toBe('conv_match');
+  });
+
+  it('matchingFailed sets no_match state', () => {
+    const store = makeStore();
+    store.dispatch(matchingStarted('req_1'));
+    store.dispatch(matchingFailed());
+    expect(selectMatchingState(store.getState())).toBe('no_match');
+    expect(selectMatchingRequestId(store.getState())).toBeNull();
+  });
+
+  it('matchingCancelled resets matching state', () => {
+    const store = makeStore();
+    store.dispatch(matchingStarted('req_1'));
+    store.dispatch(matchingCancelled());
+    expect(selectMatchingState(store.getState())).toBe('idle');
+    expect(selectMatchingRequestId(store.getState())).toBeNull();
   });
 });
 
@@ -113,11 +202,16 @@ describe('activeConversationSet', () => {
     expect(selectActiveConversationId(store.getState())).toBe('conv1');
   });
 
-  it('can be set to null', () => {
+  it('clears detail and warnings when set to null', () => {
     const store = makeStore();
-    store.dispatch(activeConversationSet('conv1'));
+    store.dispatch(conversationDetailLoaded(mockDetail()));
+    store.dispatch(expiryWarningReceived({ type: 'inactivity', conversationId: 'conv1' }));
+    store.dispatch(contactInfoWarningShown());
     store.dispatch(activeConversationSet(null));
-    expect(selectActiveConversationId(store.getState())).toBeNull();
+
+    expect(store.getState().conversations.activeDetail).toBeNull();
+    expect(store.getState().conversations.expiryWarning).toBeNull();
+    expect(store.getState().conversations.contactInfoWarning).toBe(false);
   });
 });
 
@@ -139,7 +233,7 @@ describe('messagesLoaded', () => {
     expect(selectMessages('conv1')(store.getState())).toEqual(msgs);
   });
 
-  it('prepends older messages when append = true', () => {
+  it('prepends older messages when append=true', () => {
     const store = makeStore();
     store.dispatch(messagesLoaded({
       conversationId: 'conv1',
@@ -173,24 +267,6 @@ describe('messageReceived', () => {
     store.dispatch(messageReceived({ conversationId: 'conv1', message: mockMessage({ id: 'm1' }) }));
     expect(selectMessages('conv1')(store.getState())).toHaveLength(1);
   });
-
-  it('increments unreadCount for non-active conversation', () => {
-    const store = makeStore();
-    const conv = mockConversation({ id: 'conv1', unreadCount: 0 });
-    store.dispatch(conversationsLoaded([conv]));
-    store.dispatch(activeConversationSet('conv2')); // different active
-    store.dispatch(messageReceived({ conversationId: 'conv1', message: mockMessage() }));
-    expect(selectTotalUnread(store.getState())).toBe(1);
-  });
-
-  it('does not increment unreadCount for active conversation', () => {
-    const store = makeStore();
-    const conv = mockConversation({ id: 'conv1', unreadCount: 0 });
-    store.dispatch(conversationsLoaded([conv]));
-    store.dispatch(activeConversationSet('conv1'));
-    store.dispatch(messageReceived({ conversationId: 'conv1', message: mockMessage() }));
-    expect(selectTotalUnread(store.getState())).toBe(0);
-  });
 });
 
 // ─── conversationStateUpdated ─────────────────────────────────────────────────
@@ -199,27 +275,15 @@ describe('conversationStateUpdated', () => {
   it('updates state on the matching conversation', () => {
     const store = makeStore();
     store.dispatch(conversationsLoaded([mockConversation({ id: 'conv1', state: 'active' })]));
-    store.dispatch(conversationStateUpdated({ conversationId: 'conv1', newState: 'expired' }));
-    expect(selectConversationById('conv1')(store.getState())?.state).toBe('expired');
+    store.dispatch(conversationStateUpdated({ conversationId: 'conv1', newState: 'ended_by_user' }));
+    expect(selectConversationById('conv1')(store.getState())?.state).toBe('ended_by_user');
   });
 
   it('does nothing for unknown conversation', () => {
     const store = makeStore();
     store.dispatch(conversationsLoaded([mockConversation({ id: 'conv1', state: 'active' })]));
-    store.dispatch(conversationStateUpdated({ conversationId: 'unknown', newState: 'expired' }));
+    store.dispatch(conversationStateUpdated({ conversationId: 'unknown', newState: 'ended_by_user' }));
     expect(selectConversationById('conv1')(store.getState())?.state).toBe('active');
-  });
-});
-
-// ─── unreadCleared ────────────────────────────────────────────────────────────
-
-describe('unreadCleared', () => {
-  it('resets unreadCount to 0 for the conversation', () => {
-    const store = makeStore();
-    store.dispatch(conversationsLoaded([mockConversation({ id: 'conv1', unreadCount: 5 })]));
-    store.dispatch(unreadCleared('conv1'));
-    expect(selectConversationById('conv1')(store.getState())?.unreadCount).toBe(0);
-    expect(selectTotalUnread(store.getState())).toBe(0);
   });
 });
 
@@ -246,21 +310,39 @@ describe('messageSending / messageSent / messageSendError', () => {
   });
 });
 
-// ─── selectTotalUnread ────────────────────────────────────────────────────────
+// ─── Expiry warnings ─────────────────────────────────────────────────────────
 
-describe('selectTotalUnread', () => {
-  it('sums unreadCount across all conversations', () => {
+describe('expiryWarning reducers', () => {
+  it('expiryWarningReceived stores warning', () => {
     const store = makeStore();
-    store.dispatch(conversationsLoaded([
-      mockConversation({ id: 'c1', unreadCount: 3 }),
-      mockConversation({ id: 'c2', unreadCount: 5 }),
-    ]));
-    expect(selectTotalUnread(store.getState())).toBe(8);
+    store.dispatch(expiryWarningReceived({ type: 'inactivity', conversationId: 'conv1' }));
+    const warning = selectExpiryWarning(store.getState());
+    expect(warning?.type).toBe('inactivity');
+    expect(warning?.conversationId).toBe('conv1');
   });
 
-  it('returns 0 when no conversations', () => {
+  it('expiryWarningCleared removes warning', () => {
     const store = makeStore();
-    expect(selectTotalUnread(store.getState())).toBe(0);
+    store.dispatch(expiryWarningReceived({ type: 'inactivity', conversationId: 'conv1' }));
+    store.dispatch(expiryWarningCleared());
+    expect(selectExpiryWarning(store.getState())).toBeNull();
+  });
+});
+
+// ─── Contact info warning ─────────────────────────────────────────────────────
+
+describe('contactInfoWarning reducers', () => {
+  it('contactInfoWarningShown sets flag to true', () => {
+    const store = makeStore();
+    store.dispatch(contactInfoWarningShown());
+    expect(selectContactInfoWarning(store.getState())).toBe(true);
+  });
+
+  it('contactInfoWarningDismissed resets flag', () => {
+    const store = makeStore();
+    store.dispatch(contactInfoWarningShown());
+    store.dispatch(contactInfoWarningDismissed());
+    expect(selectContactInfoWarning(store.getState())).toBe(false);
   });
 });
 
