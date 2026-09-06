@@ -1,0 +1,55 @@
+/**
+ * environment.ts
+ *
+ * Validates and exports all environment variables at startup.
+ * The app will throw and refuse to start if any required variable is missing.
+ * Never access process.env directly elsewhere — always import from here.
+ */
+import { z } from 'zod';
+
+const EnvironmentSchema = z.object({
+  // ─── Node ─────────────────────────────────────────────────────────────────
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().int().positive().default(4000),
+
+  // ─── MongoDB ──────────────────────────────────────────────────────────────
+  MONGODB_URI: z.string().url('MONGODB_URI must be a valid URL'),
+
+  // ─── Redis ────────────────────────────────────────────────────────────────
+  REDIS_URL: z.string().url('REDIS_URL must be a valid URL'),
+
+  // ─── Firebase ─────────────────────────────────────────────────────────────
+  FIREBASE_PROJECT_ID: z.string().min(1),
+  FIREBASE_CLIENT_EMAIL: z.string().email(),
+  FIREBASE_PRIVATE_KEY: z.string().min(1),
+
+  // ─── CORS ─────────────────────────────────────────────────────────────────
+  ALLOWED_ORIGINS: z.string().min(1).default('http://localhost:3000'),
+
+  // ─── Feature flags store (MongoDB collection name) ────────────────────────
+  FEATURE_FLAGS_COLLECTION: z.string().default('featureFlags'),
+
+  // ─── Logging ──────────────────────────────────────────────────────────────
+  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
+
+  // ─── Rate limiting ────────────────────────────────────────────────────────
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
+  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
+});
+
+type Environment = z.infer<typeof EnvironmentSchema>;
+
+function loadEnvironment(): Environment {
+  const parsed = EnvironmentSchema.safeParse(process.env);
+
+  if (!parsed.success) {
+    const issues = parsed.error.issues
+      .map((issue) => `  ${issue.path.join('.')}: ${issue.message}`)
+      .join('\n');
+    throw new Error(`\n\n❌  Environment validation failed:\n${issues}\n`);
+  }
+
+  return parsed.data;
+}
+
+export const env: Environment = loadEnvironment();
