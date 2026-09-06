@@ -24,10 +24,11 @@ jest.mock('../../middleware/auth.middleware', () => ({
   }),
 }));
 jest.mock('../../middleware/rateLimiter.middleware', () => ({
-  createRateLimiter: () => jest.fn((_req: any, _res: any, next: () => void) => next()),
+  createRateLimiter:        () => jest.fn((_req: any, _res: any, next: () => void) => next()),
   globalRateLimiter:        jest.fn((_req: any, _res: any, next: () => void) => next()),
   aliasRotationRateLimiter: jest.fn((_req: any, _res: any, next: () => void) => next()),
   postRateLimiter:          jest.fn((_req: any, _res: any, next: () => void) => next()),
+  reactionRateLimiter:      jest.fn((_req: any, _res: any, next: () => void) => next()),
 }));
 
 import * as postService from './post.service';

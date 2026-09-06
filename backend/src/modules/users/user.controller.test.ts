@@ -53,6 +53,7 @@ jest.mock('../../middleware/auth.middleware', () => ({
 jest.mock('../../middleware/rateLimiter.middleware', () => ({
   globalRateLimiter:         (_req: unknown, _res: unknown, next: () => void) => next(),
   aliasRotationRateLimiter:  (_req: unknown, _res: unknown, next: () => void) => next(),
+  reactionRateLimiter:       (_req: unknown, _res: unknown, next: () => void) => next(),
   createRateLimiter:         () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
