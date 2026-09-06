@@ -27,6 +27,7 @@ export const API = {
   POST: (id: string) => `${BASE}/posts/${id}`,
   POST_REACTIONS: (postId: string) => `${BASE}/posts/${postId}/reactions`,
   POST_SAVED: (postId: string) => `${BASE}/posts/${postId}/saved`,
+  POST_SIMILAR: (postId: string) => `${BASE}/posts/${postId}/similar`,
   POSTS_MY: `${BASE}/posts/my`,
 
   // ─── Discovery ──────────────────────────────────────────────────────────────

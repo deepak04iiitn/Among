@@ -58,6 +58,13 @@ describe('Redux store', () => {
 
   it('initializes with correct discovery initial state', () => {
     expect(state.discovery).toEqual({
+      // Home feed
+      primaryPost:    null,
+      secondaryPosts: [],
+      feedFetched:    false,
+      feedLoading:    false,
+      feedError:      null,
+      // Categories
       categories:          [],
       activeCategory:      null,
       categoryPosts:       [],
@@ -65,6 +72,13 @@ describe('Redux store', () => {
       categoriesStatus:    'idle',
       postsStatus:         'idle',
       error:               null,
+      // YANA
+      yanaStats:   [],
+      yanaLoading: false,
+      // Saved
+      savedPosts:       [],
+      savedPostsCursor: null,
+      savedLoading:     false,
     });
   });
 

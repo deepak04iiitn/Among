@@ -10,6 +10,7 @@
  */
 import { Router } from 'express';
 import * as controller from './post.controller';
+import * as discoveryController from '../discovery/discovery.controller';
 import { requireAuth, requireOnboarding, optionalAuth } from '../../middleware/auth.middleware';
 import { validate } from '../../middleware/validate.middleware';
 import { createRateLimiter } from '../../middleware/rateLimiter.middleware';
@@ -64,4 +65,25 @@ postsRouter.delete(
   requireAuth,
   requireOnboarding,
   controller.deletePost
+);
+
+/** Get similar posts for SEO internal linking — auth optional */
+postsRouter.get(
+  '/:id/similar',
+  optionalAuth,
+  discoveryController.getSimilarPosts
+);
+
+/** Save a post */
+postsRouter.post(
+  '/:id/saved',
+  requireAuth,
+  discoveryController.savePost
+);
+
+/** Unsave a post */
+postsRouter.delete(
+  '/:id/saved',
+  requireAuth,
+  discoveryController.unsavePost
 );

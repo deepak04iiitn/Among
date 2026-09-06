@@ -18,6 +18,7 @@ import { globalRateLimiter } from './middleware/rateLimiter.middleware';
 import { authRouter, usersRouter } from './modules/users/user.routes';
 import { postsRouter } from './modules/posts/post.routes';
 import { reactionsRouter } from './modules/reactions/reaction.routes';
+import { discoveryRouter } from './modules/discovery/discovery.routes';
 
 export function createApp(): express.Application {
   const app = express();
@@ -72,6 +73,7 @@ export function createApp(): express.Application {
   app.use('/api/users', usersRouter);
   app.use('/api/posts', postsRouter);
   app.use('/api/posts/:postId/reactions', reactionsRouter);
+  app.use('/api/discovery', discoveryRouter);
 
   // ─── 404 handler ─────────────────────────────────────────────────────────
   app.use((_req: Request, res: Response) => {

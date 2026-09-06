@@ -59,6 +59,9 @@ export interface IUser extends Document {
   // "Someone Needs You" opt-ins per category
   snyOptIns: string[];
 
+  // Saved posts
+  savedPostIds: Types.ObjectId[];
+
   // Soft delete
   deletedAt: Date | null;
 
@@ -128,6 +131,9 @@ const UserSchema = new Schema<IUser>(
 
     // SNY opt-ins
     snyOptIns: { type: [String], default: [] },
+
+    // Saved posts
+    savedPostIds: { type: [Schema.Types.ObjectId], ref: 'Post', default: [] },
 
     // Soft delete
     deletedAt: { type: Date, default: null },

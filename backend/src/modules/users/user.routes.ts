@@ -17,6 +17,9 @@ import { requireAuth, requireOnboarding } from '../../middleware/auth.middleware
 import { validate } from '../../middleware/validate.middleware';
 import { aliasRotationRateLimiter } from '../../middleware/rateLimiter.middleware';
 import * as controller from './user.controller';
+import * as discoveryController from '../discovery/discovery.controller';
+import { validate as validateQuery } from '../../middleware/validate.middleware';
+import { savedPostsQuerySchema } from '../discovery/discovery.schema';
 import {
   createSessionSchema,
   completeOnboardingSchema,
@@ -75,3 +78,18 @@ usersRouter.put(
 usersRouter.post('/me/export', controller.requestDataExport);
 
 usersRouter.delete('/me', controller.deleteAccount);
+
+/** Saved posts (paginated) */
+usersRouter.get(
+  '/me/saved',
+  requireOnboarding,
+  validateQuery(savedPostsQuerySchema, 'query'),
+  discoveryController.getSavedPosts
+);
+
+/** "You Are Not Alone" aggregate stats */
+usersRouter.get(
+  '/me/you-are-not-alone',
+  requireOnboarding,
+  discoveryController.getYouAreNotAlone
+);
