@@ -17,8 +17,8 @@ interface LogoProps {
  * Wraps in a <Link> by default; pass href={false} to suppress the link.
  */
 export default function Logo({ height = 28, href = ROUTES.LANDING, className = '' }: LogoProps) {
-  // The source image is 600×200 px (3:1 ratio). Compute width from height.
-  const aspectRatio = 600 / 200;
+  // The source image is 612×408 px (~3:2 ratio, icon-over-wordmark lockup). Compute width from height.
+  const aspectRatio = 612 / 408;
   const width = Math.round(height * aspectRatio);
 
   const img = (

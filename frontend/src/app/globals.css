@@ -1,6 +1,7 @@
 /* ─── AMONG Design System — CSS Custom Properties ──────────────────────────── */
 /* All design tokens live here. Never use raw values in components.             */
-/* Phase 2B: indigo accent, pure-white background, editorial aesthetic.         */
+/* Theme: "Afterhours" — see /docs/theme.md for the full documented system.     */
+/* Deep ink ground, warm ember accent, editorial serif for content only.        */
 
 @tailwind base;
 @tailwind components;
@@ -10,28 +11,32 @@
   /* ─── Color tokens ─────────────────────────────────────────────────────── */
   :root {
     /* Surfaces */
-    --color-bg:            #FFFFFF;
-    --color-bg-subtle:     #FAFAFA;   /* innermost nested surfaces — use sparingly */
+    --color-bg:            #15161C;
+    --color-bg-subtle:     #1D1F27;   /* nested surfaces — cards, inputs, nav */
+    /* Noticeably lighter than --color-bg (not just --color-bg-subtle re-used at low alpha) —
+       needs enough contrast against the page that its edge reads without leaning on the shadow. */
+    --color-surface-glass:        rgba(38, 41, 51, 0.82);  /* floating/detached chrome only — the nav capsule */
+    --color-surface-glass-strong: rgba(42, 45, 56, 0.94);  /* same, once scrolled — needs to stay legible over content */
 
     /* Text */
-    --color-text:          #111111;
-    --color-text-secondary:#555555;
-    --color-text-muted:    #999999;
+    --color-text:          #EDE9E2;
+    --color-text-secondary:#B7B4AE;
+    --color-text-muted:    #9B9AA3;
 
     /* Borders */
-    --color-border:        #E8E8E8;
-    --color-border-strong: #D0D0D0;
+    --color-border:        #2C2F3A;
+    --color-border-strong: #3B3E4C;
 
-    /* Accent — single indigo, no other accent color in the product */
-    --color-accent:        #4F46E5;
-    --color-accent-hover:  #4338CA;
-    --color-accent-subtle: #EEF2FF;  /* ONLY for focus rings + very light selected states */
+    /* Accent — single warm ember, no other accent color in the product */
+    --color-accent:        #E3A64F;
+    --color-accent-hover:  #EEB768;
+    --color-accent-subtle: rgba(227, 166, 79, 0.14);  /* ONLY for focus rings + very light selected states */
 
     /* Semantic — muted / desaturated, never saturated "alert" colors */
-    --color-error: #C0392B;
-    --color-warn:  #B7791F;
-    --color-ok:    #276749;
-    --color-info:  #2B6CB0;
+    --color-error: #E0645A;
+    --color-warn:  #C08A3E;
+    --color-ok:    #5FA671;
+    --color-info:  #6C8FC7;
 
     /* ─── Border radii ───────────────────────────────────────────────────── */
     --radius-sm:   6px;
@@ -52,25 +57,25 @@
 
     /* ─── shadcn/ui compatibility aliases (HSL format required by shadcn) ── */
     /* These mirror the hex tokens above and are used by shadcn primitives.   */
-    --background:       0 0% 100%;
-    --foreground:       0 0% 7%;
-    --card:             0 0% 98%;
-    --card-foreground:  0 0% 7%;
-    --popover:          0 0% 100%;
-    --popover-foreground: 0 0% 7%;
-    --primary:          0 0% 7%;
-    --primary-foreground: 0 0% 100%;
-    --secondary:        0 0% 98%;
-    --secondary-foreground: 0 0% 7%;
-    --muted:            0 0% 98%;
-    --muted-foreground: 0 0% 60%;
-    --accent:           243 75% 59%;
-    --accent-foreground: 0 0% 100%;
-    --destructive:      4 67% 47%;
-    --destructive-foreground: 0 0% 100%;
-    --border:           0 0% 91%;
-    --input:            0 0% 91%;
-    --ring:             243 75% 59%;
+    --background:       228 14% 10%;
+    --foreground:       38 10% 91%;
+    --card:             228 15% 13%;
+    --card-foreground:  38 10% 91%;
+    --popover:          228 15% 13%;
+    --popover-foreground: 38 10% 91%;
+    --primary:          38 10% 91%;
+    --primary-foreground: 228 14% 10%;
+    --secondary:        228 15% 13%;
+    --secondary-foreground: 38 10% 91%;
+    --muted:            228 15% 13%;
+    --muted-foreground: 247 5% 62%;
+    --accent:           35 74% 60%;
+    --accent-foreground: 228 14% 10%;
+    --destructive:      5 73% 62%;
+    --destructive-foreground: 38 10% 91%;
+    --border:           227 24% 20%;
+    --input:            227 24% 20%;
+    --ring:             35 74% 60%;
     --radius:           0.625rem; /* 10px — matches --radius-md */
   }
 
@@ -300,8 +305,10 @@
   }
 
   /* ── Crisis banner (assertive, never dismissed < 3s) ── */
+  /* Deliberately NOT the error color — this must read as warm and supportive, */
+  /* never as an alarm. Uses the "ok" semantic tone on a soft dark wash.       */
   .crisis-banner {
-    @apply border border-[var(--color-error)] bg-[#FFF5F5]
-           text-[var(--color-error)] rounded-[var(--radius-md)] p-4;
+    @apply border border-[var(--color-ok)] bg-[rgba(95,166,113,0.10)]
+           text-[var(--color-text)] rounded-[var(--radius-md)] p-4;
   }
 }

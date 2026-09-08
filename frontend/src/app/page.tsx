@@ -14,7 +14,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ROUTES } from '../constants/routes';
 import { EXPERIENCE_CATEGORIES } from '../constants/experienceCategories';
-import Logo from '../components/layout/Logo';
+import Navigation from '../components/layout/Navigation';
 
 export const metadata: Metadata = {
   title: 'AMONG — You are not alone in this',
@@ -92,26 +92,8 @@ export default function LandingPage() {
 
       <div className="min-h-dvh flex flex-col bg-[var(--color-bg)]">
 
-        {/* ── Minimal header ─────────────────────────────────────────────── */}
-        <header className="sticky top-0 z-20 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
-          <div className="max-w-shell mx-auto px-5 md:px-8 h-14 flex items-center justify-between">
-            <Logo href={false} height={24} />
-            <nav aria-label="Main navigation" className="flex items-center gap-4">
-              <Link
-                href={ROUTES.EXPLORE}
-                className="text-ui text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors duration-[var(--duration-fast)] hidden sm:block"
-              >
-                Explore
-              </Link>
-              <Link
-                href={ROUTES.ONBOARDING_INTENT}
-                className="btn-primary py-2 px-5 text-ui"
-              >
-                Enter Among →
-              </Link>
-            </nav>
-          </div>
-        </header>
+        {/* ── Primary navigation — shared Floating Capsule (docs/theme.md §7) ── */}
+        <Navigation />
 
         <main id="main-content">
           {/* ── Hero — full-viewport, centered, pure white ─────────────────── */}

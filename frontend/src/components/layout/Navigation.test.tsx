@@ -24,14 +24,15 @@ jest.mock('next/image', () => ({
 }));
 
 // ── Mock next/link ─────────────────────────────────────────────────────────
+// forwardRef here to match real next/link, which forwards its ref to the
+// underlying <a> — Navigation uses this to measure link positions.
 jest.mock('next/link', () => {
-  const Link = ({
-    children,
-    href,
-    ...props
-  }: React.PropsWithChildren<{ href: string; [key: string]: unknown }>) => (
-    <a href={href} {...props}>{children}</a>
-  );
+  const Link = React.forwardRef<
+    HTMLAnchorElement,
+    React.PropsWithChildren<React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }>
+  >(({ children, href, ...props }, ref) => (
+    <a href={href} ref={ref} {...props}>{children}</a>
+  ));
   Link.displayName = 'Link';
   return Link;
 });
@@ -90,16 +91,17 @@ describe('Navigation (unauthenticated)', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument();
   });
 
-  it('renders the brand logo', () => {
+  it('renders the brand wordmark', () => {
     asGuest();
     render(<Navigation />);
-    expect(screen.getByRole('img', { name: /among/i })).toBeInTheDocument();
+    // Text wordmark, not an image — see docs/theme.md §7 "Floating Capsule".
+    expect(screen.getByText('Among', { exact: true })).toBeInTheDocument();
   });
 
   it('renders the "Enter Among" CTA for guests', () => {
     asGuest();
     render(<Navigation />);
-    expect(screen.getByText('Enter Among')).toBeInTheDocument();
+    expect(screen.getByText(/enter among/i)).toBeInTheDocument();
   });
 
   it('does not render the authenticated nav links for guests', () => {

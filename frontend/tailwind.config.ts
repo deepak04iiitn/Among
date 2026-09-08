@@ -82,8 +82,8 @@ const config: Config = {
 
       // ─── Typography ─────────────────────────────────────────────────────
       fontFamily: {
-        editorial: ['var(--font-editorial)', 'Lora', 'Georgia', 'serif'],
-        ui:        ['var(--font-ui)',        'Inter', 'system-ui', 'sans-serif'],
+        editorial: ['var(--font-editorial)', 'Fraunces', 'Georgia', 'serif'],
+        ui:        ['var(--font-ui)',        'Karla', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         // Fixed editorial scale — see CLAUDE.md §7.4 for token rationale
