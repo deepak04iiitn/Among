@@ -1,18 +1,20 @@
 /**
  * Footer component tests.
- * Verifies the "Letter / Typesetter" structure: landmark, letter body,
- * brand lockup, P.S. category index, and colophon stamp.
+ * Verifies the endpaper band: landmark, statement, brand lockup,
+ * platform/rooms/legal indexes, and baseline CTA.
  */
 
 import { render, screen } from '@testing-library/react';
 import Footer from './Footer';
 import { EXPERIENCE_CATEGORIES } from '../../constants/experienceCategories';
 import {
-  FOOTER_COLOPHON_LINKS,
   FOOTER_COPY,
+  FOOTER_LEGAL_LINKS,
+  FOOTER_PLATFORM_LINKS,
   footerCopyright,
 } from '../../constants/footer';
 import { BRAND_LOGO } from '../../constants/brand';
+import { ROUTES } from '../../constants/routes';
 
 jest.mock('next/image', () => ({
   __esModule: true,
@@ -34,7 +36,7 @@ describe('Footer', () => {
     expect(screen.getByRole('link', { name: BRAND_LOGO.LINK_ARIA })).toBeInTheDocument();
   });
 
-  it('renders the letter body', () => {
+  it('renders the closing statement', () => {
     render(<Footer />);
     expect(screen.getByText(FOOTER_COPY.STATEMENT)).toBeInTheDocument();
   });
@@ -46,9 +48,16 @@ describe('Footer', () => {
     });
   });
 
-  it('renders the platform and legal links', () => {
+  it('renders the platform links', () => {
     render(<Footer />);
-    FOOTER_COLOPHON_LINKS.forEach(({ label }) => {
+    FOOTER_PLATFORM_LINKS.forEach(({ label }) => {
+      expect(screen.getByRole('link', { name: label })).toBeInTheDocument();
+    });
+  });
+
+  it('renders the legal links', () => {
+    render(<Footer />);
+    FOOTER_LEGAL_LINKS.forEach(({ label }) => {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument();
     });
   });
@@ -58,9 +67,25 @@ describe('Footer', () => {
     expect(screen.getByText(footerCopyright(new Date().getFullYear()))).toBeInTheDocument();
   });
 
-  it('has distinct nav landmarks for the P.S. index and the colophon', () => {
+  it('renders the homepage CTA', () => {
     render(<Footer />);
-    expect(screen.getByRole('navigation', { name: FOOTER_COPY.PS_HEADING })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: FOOTER_COPY.COLOPHON_NAV })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: FOOTER_COPY.CTA_ARIA })).toHaveAttribute(
+      'href',
+      ROUTES.LANDING,
+    );
+  });
+
+  it('has distinct nav landmarks for platform, rooms, and legal', () => {
+    render(<Footer />);
+    expect(screen.getByRole('navigation', { name: FOOTER_COPY.PLATFORM_NAV })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: FOOTER_COPY.ROOMS_NAV })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: FOOTER_COPY.LEGAL_NAV })).toBeInTheDocument();
+  });
+
+  it('uses a full-width endpaper surface', () => {
+    render(<Footer />);
+    const footer = screen.getByRole('contentinfo');
+    expect(footer).toHaveClass('w-full');
+    expect(footer).toHaveClass('bg-bg-subtle');
   });
 });

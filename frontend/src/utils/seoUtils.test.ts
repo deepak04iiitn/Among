@@ -5,12 +5,10 @@
  *  - Every page gets unique title and description.
  *  - Canonical URLs are always present.
  *  - OG tags mirror the title/description.
- *  - BreadcrumbList JSON-LD has correct position ordering.
  *  - Organization JSON-LD has required schema.org fields.
  */
 import {
   buildPageMeta,
-  buildBreadcrumbJsonLd,
   buildOrganizationJsonLd,
   buildWebSiteJsonLd,
   buildFaqPageJsonLd,
@@ -79,40 +77,6 @@ describe('buildPageMeta', () => {
     const meta = buildPageMeta({ title: 'T', description: 'D', canonical: '/t' });
     const tw = meta.twitter as { card: string };
     expect(tw.card).toBe('summary');
-  });
-});
-
-describe('buildBreadcrumbJsonLd', () => {
-  it('generates valid BreadcrumbList with correct positions', () => {
-    const result = buildBreadcrumbJsonLd([
-      { name: 'AMONG',   url: '/' },
-      { name: 'Explore', url: '/explore' },
-      { name: 'Grief',   url: '/explore/grief' },
-    ]);
-    const ld = result as {
-      '@type': string;
-      itemListElement: Array<{ '@type': string; position: number; name: string }>;
-    };
-    expect(ld['@type']).toBe('BreadcrumbList');
-    expect(ld.itemListElement).toHaveLength(3);
-    expect(ld.itemListElement[0].position).toBe(1);
-    expect(ld.itemListElement[1].position).toBe(2);
-    expect(ld.itemListElement[2].position).toBe(3);
-    expect(ld.itemListElement[2].name).toBe('Grief');
-  });
-
-  it('prepends siteUrl to relative paths', () => {
-    const result = buildBreadcrumbJsonLd([{ name: 'Page', url: '/page' }]) as {
-      itemListElement: Array<{ item: string }>;
-    };
-    expect(result.itemListElement[0].item).toContain('/page');
-  });
-
-  it('preserves absolute URLs without doubling', () => {
-    const result = buildBreadcrumbJsonLd([
-      { name: 'AMONG', url: 'https://among.io' },
-    ]) as { itemListElement: Array<{ item: string }> };
-    expect(result.itemListElement[0].item).toBe('https://among.io');
   });
 });
 

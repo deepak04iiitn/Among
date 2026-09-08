@@ -5,7 +5,7 @@
  * directly in the HTML. Safe: no PII is ever included.
  *
  * Usage:
- *   <JsonLd data={buildBreadcrumbJsonLd([...])} />
+ *   <JsonLd data={buildOrganizationJsonLd()} />
  */
 
 interface JsonLdProps {

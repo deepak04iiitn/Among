@@ -12,11 +12,9 @@
  */
 import type { Metadata }  from 'next';
 import Link               from 'next/link';
-import JsonLd             from '../../../../components/common/JsonLd';
 import AppShell           from '../../../../components/layout/AppShell';
-import Breadcrumb         from '../../../../components/layout/Breadcrumb';
-import { buildPageMeta, buildBreadcrumbJsonLd } from '../../../../utils/seoUtils';
-import { PAGE_META, SITE_URL }                  from '../../../../constants/seo';
+import { buildPageMeta } from '../../../../utils/seoUtils';
+import { PAGE_META }                  from '../../../../constants/seo';
 import { ROUTES }                               from '../../../../constants/routes';
 import { EXPERIENCE_CATEGORIES }               from '../../../../constants/experienceCategories';
 
@@ -119,32 +117,12 @@ export default async function PostPage({ params }: PostPageProps) {
     );
   }
 
-  // Resolve category for breadcrumb
   const primaryCategoryId = post.categoryIds[0];
   const category = EXPERIENCE_CATEGORIES.find((c) => c.id === primaryCategoryId);
 
-  const breadcrumbData = buildBreadcrumbJsonLd([
-    { name: 'AMONG',   url: SITE_URL },
-    { name: 'Explore', url: `${SITE_URL}/explore` },
-    ...(category ? [{ name: category.displayName, url: `${SITE_URL}/explore/${category.slug}` }] : []),
-    { name: 'Experience', url: `${SITE_URL}/post/${id}` },
-  ]);
-
   return (
     <AppShell>
-      <JsonLd data={breadcrumbData} id="post-breadcrumb" />
-
       <div className="content-column py-10">
-        <Breadcrumb
-          segments={[
-            { label: 'AMONG',   href: ROUTES.LANDING },
-            { label: 'Explore', href: ROUTES.EXPLORE },
-            ...(category ? [{ label: category.displayName, href: ROUTES.EXPLORE_CATEGORY(category.slug) }] : []),
-            { label: 'Experience' },
-          ]}
-          className="mb-6"
-        />
-
         {/* Post body — editorial typography */}
         <article aria-labelledby="post-heading">
           <h1 id="post-heading" className="sr-only">

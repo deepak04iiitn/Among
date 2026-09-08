@@ -11,6 +11,8 @@ export interface LogoProps {
   height?: number;
   /** Wraps the logo in a Link — pass false to render as a plain <span> */
   href?: string | false;
+  /** Wordmark color — inverse for espresso surfaces (footer back cover). */
+  tone?: 'default' | 'inverse';
   /** Extra Tailwind classes on the wrapping element */
   className?: string;
   /** Eager-load for above-the-fold placements (nav). Default: false */
@@ -24,11 +26,13 @@ export interface LogoProps {
 export default function Logo({
   height = BRAND_LOGO.NAV_HEIGHT_PX,
   href = ROUTES.LANDING,
+  tone = 'default',
   className = '',
   priority = false,
 }: LogoProps): JSX.Element {
   const width = brandLogoWidth(height);
   const isFooterScale = height >= BRAND_LOGO.FOOTER_HEIGHT_PX;
+  const wordmarkColor = tone === 'inverse' ? COLOR.BG : COLOR.TEXT;
 
   const lockup = (
     <>
@@ -44,7 +48,7 @@ export default function Logo({
       <span
         className={cn(
           FONT.BRAND,
-          COLOR.TEXT,
+          wordmarkColor,
           'lowercase font-medium leading-none tracking-tight',
           isFooterScale ? TEXT_SIZE.HEADLINE : TEXT_SIZE.TITLE,
         )}

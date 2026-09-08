@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import AppShell from '../../components/layout/AppShell';
-import Breadcrumb from '../../components/layout/Breadcrumb';
 import { ROUTES } from '../../constants/routes';
 
 export const metadata: Metadata = {
@@ -15,11 +14,6 @@ export default function GuidelinesPage() {
   return (
     <AppShell>
       <div className="content-column py-10">
-        <Breadcrumb
-          segments={[{ label: 'AMONG', href: ROUTES.LANDING }, { label: 'Guidelines' }]}
-          className="mb-6"
-        />
-
         <h1 className="font-editorial text-title-xl text-[var(--color-text)] text-balance">
           Community guidelines
         </h1>

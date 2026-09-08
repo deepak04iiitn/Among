@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import AppShell from '../../components/layout/AppShell';
-import Breadcrumb from '../../components/layout/Breadcrumb';
 import { EXPERIENCE_CATEGORIES } from '../../constants/experienceCategories';
 import { ROUTES } from '../../constants/routes';
 
@@ -19,11 +18,6 @@ export default function SitemapPage() {
   return (
     <AppShell>
       <div className="content-column py-10">
-        <Breadcrumb
-          segments={[{ label: 'AMONG', href: ROUTES.LANDING }, { label: 'Sitemap' }]}
-          className="mb-6"
-        />
-
         <h1 className="font-editorial text-title-xl text-[var(--color-text)] text-balance">
           Sitemap
         </h1>

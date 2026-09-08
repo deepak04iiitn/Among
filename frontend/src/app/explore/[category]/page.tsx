@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { EXPERIENCE_CATEGORIES } from '../../../constants/experienceCategories';
 import { ROUTES } from '../../../constants/routes';
 import AppShell from '../../../components/layout/AppShell';
-import Breadcrumb from '../../../components/layout/Breadcrumb';
 
 // ISR: revalidate every 5 minutes (FR-SEO-1)
 export const revalidate = 300;
@@ -37,8 +36,8 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
 /**
  * Category explore page — SSR with ISR.
- * SEO: unique title/description, canonical, BreadcrumbList JSON-LD, internal links.
- * FR-SEO-1, FR-SEO-2, FR-SEO-3, FR-SEO-16, FR-SEO-18.
+ * SEO: unique title/description, canonical, internal links.
+ * FR-SEO-1, FR-SEO-2, FR-SEO-3, FR-SEO-16.
  */
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category: slug } = await params;
@@ -53,15 +52,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   return (
     <AppShell>
       <div className="content-column py-10">
-        <Breadcrumb
-          segments={[
-            { label: 'AMONG',   href: ROUTES.LANDING },
-            { label: 'Explore', href: ROUTES.EXPLORE },
-            { label: cat.displayName },
-          ]}
-          className="mb-6"
-        />
-
         <h1 className="font-editorial text-title-xl text-[var(--color-text)] text-balance">
           {cat.displayName}
         </h1>

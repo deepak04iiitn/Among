@@ -27,8 +27,9 @@ export const PAGE_META = {
   },
 
   EXPLORE: {
-    title:       'Explore experiences — AMONG',
-    description: 'Browse anonymous human experiences on AMONG. Find people who have lived through loneliness, grief, career struggles, relationships, and more.',
+    title:       'Browse anonymous rooms of lived experience | AMONG',
+    description:
+      'Enter public rooms of anonymous lived experience — loneliness, work, family, love, and things you cannot say. Read without an account. No names. No followers.',
     keywords:    ['explore experiences', 'anonymous stories', 'shared human experiences', 'emotional support community'],
   },
 

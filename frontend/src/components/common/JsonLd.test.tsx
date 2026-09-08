@@ -28,8 +28,8 @@ describe('JsonLd', () => {
   });
 
   it('applies optional id to the script tag', () => {
-    const { container } = render(<JsonLd data={{ '@type': 'BreadcrumbList' }} id="breadcrumb" />);
-    const script = container.querySelector('script#breadcrumb');
+    const { container } = render(<JsonLd data={{ '@type': 'Organization' }} id="ld-org" />);
+    const script = container.querySelector('script#ld-org');
     expect(script).not.toBeNull();
   });
 });

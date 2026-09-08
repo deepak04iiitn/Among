@@ -52,25 +52,6 @@ export function buildPageMeta(opts: {
 
 // ─── Structured data helpers ──────────────────────────────────────────────────
 
-export interface BreadcrumbSegment {
-  name: string;
-  url:  string;
-}
-
-/** JSON-LD BreadcrumbList for nested pages (FR-SEO-18) */
-export function buildBreadcrumbJsonLd(items: BreadcrumbSegment[]): object {
-  return {
-    '@context':        'https://schema.org',
-    '@type':           'BreadcrumbList',
-    itemListElement:   items.map((item, idx) => ({
-      '@type':    'ListItem',
-      position:   idx + 1,
-      name:       item.name,
-      item:       item.url.startsWith('http') ? item.url : `${SITE_URL}${item.url}`,
-    })),
-  };
-}
-
 /** JSON-LD Organization (landing, about) */
 export function buildOrganizationJsonLd(): object {
   return {
