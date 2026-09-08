@@ -33,7 +33,7 @@ export const COLOR = {
   BG: 'bg-bg',
   BG_SUBTLE: 'bg-bg-subtle',
   BG_ACCENT_SUBTLE: 'bg-accent-subtle',
-  BG_TEXT: 'bg-text',       // Inverted — deep black background (alias reveal, primary CTA)
+  BG_TEXT: 'bg-text',       // Inverted — espresso fill, cream type (primary CTA)
   BG_ACCENT: 'bg-accent',
 
   // Border

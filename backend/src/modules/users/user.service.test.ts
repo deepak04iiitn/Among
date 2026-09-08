@@ -49,7 +49,7 @@ jest.mock('../../utils/aliasGenerator', () => ({
 }));
 
 jest.mock('../../utils/avatarGenerator', () => ({
-  generateAvatarData: jest.fn(() => ({ shape: 0, rotation: 90, primaryColor: '#E8E8E8', secondColor: '#999999', hasIndigoDot: false, patternIndex: 2, seed: 'test-seed' })),
+  generateAvatarData: jest.fn(() => ({ shape: 0, rotation: 90, primaryColor: '#E0D6C8', secondColor: '#6F6960', hasIndigoDot: false, patternIndex: 2, seed: 'test-seed' })),
 }));
 
 import * as userService from './user.service';

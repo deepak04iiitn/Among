@@ -107,7 +107,7 @@ export default function NotificationBell({
               'absolute top-1.5 right-1.5',
               'flex items-center justify-center',
               'min-w-[16px] h-4 px-1',
-              'bg-[var(--color-accent)] text-white',
+              'bg-[var(--color-accent)] text-[var(--color-bg)]',
               'text-[10px] font-medium leading-none',
               'rounded-full',
             )}

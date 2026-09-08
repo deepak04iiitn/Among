@@ -3,9 +3,9 @@
  * Server component — fully SSR for SEO and Core Web Vitals.
  *
  * Design (Plan §7B.6 — Landing Page):
- *  - Full-viewport hero: centered, pure white, zero imagery.
+ *  - Full-viewport hero: centered, cream linen, zero imagery.
  *  - H1 in `font-editorial text-display` with word-stagger animation.
- *  - Single CTA: "Enter Among →" — inverted pill (black on white).
+ *  - Single CTA: "Enter Among →" — inverted pill (espresso on linen).
  *  - Scrollable editorial sections: staggered two-column typographic blocks.
  *  - Experience category strip: horizontal flowing name list, text only.
  *  - Footer tagline: small, honest, not marketed.
@@ -97,7 +97,7 @@ export default function LandingPage() {
         <Navigation />
 
         <main id="main-content">
-          {/* ── Hero — full-viewport, centered, pure white ─────────────────── */}
+          {/* ── Hero — full-viewport, centered, cream linen ──────────────── */}
           <section
             aria-label="Welcome to AMONG"
             className="flex-1 flex flex-col items-center justify-center text-center px-6 py-24 md:py-40 min-h-[calc(100dvh-3.5rem)]"

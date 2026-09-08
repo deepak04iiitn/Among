@@ -47,7 +47,7 @@ export default function SkipControls({
   return (
     <div className="flex items-center gap-3">
       {atLimit ? (
-        <p className="text-sm text-neutral-400 italic">
+        <p className="text-ui text-text-muted italic">
           No more suggestions for today.
         </p>
       ) : (
@@ -56,8 +56,8 @@ export default function SkipControls({
           onClick={handleSkip}
           disabled={isLoading}
           className="
-            inline-flex items-center gap-1.5 text-sm font-medium text-neutral-500
-            hover:text-neutral-700 transition-colors duration-150
+            inline-flex items-center gap-1.5 text-ui font-medium text-text-secondary
+            hover:text-text transition-colors duration-150
             disabled:opacity-40 disabled:cursor-not-allowed
           "
           aria-label="See another experience"
@@ -65,7 +65,7 @@ export default function SkipControls({
           See another
           {skipsUsed > 0 && (
             <span
-              className="text-xs text-neutral-400"
+              className="text-caption text-text-muted"
               aria-label={`${skipsUsed} of ${DAILY_SNY_SKIP_LIMIT} skips used`}
             >
               ({skipsUsed}/{DAILY_SNY_SKIP_LIMIT})
@@ -79,7 +79,7 @@ export default function SkipControls({
         onClick={handleDismiss}
         disabled={isLoading}
         className="
-          text-sm text-neutral-400 hover:text-neutral-600
+          text-ui text-text-muted hover:text-text
           transition-colors duration-150
           disabled:opacity-40 disabled:cursor-not-allowed
         "

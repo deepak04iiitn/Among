@@ -106,7 +106,7 @@ describe('CategorySelector', () => {
     expect(onChange2).not.toHaveBeenCalled();
   });
 
-  it('shows indigo dot on selected category', () => {
+  it('shows accent dot on selected category', () => {
     setup({ selectedIds: ['loneliness'] });
     const lonelinessTile = screen.getByRole('checkbox', { name: /Loneliness/i });
     const dot = lonelinessTile.querySelector('[aria-hidden="true"]');

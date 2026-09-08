@@ -7,7 +7,7 @@ import { cn } from '../../lib/utils';
  *
  * Variant options:
  *  - `default`  : charcoal border + muted text. Neutral metadata.
- *  - `active`   : indigo border + indigo text + subtle fill. Selected state.
+ *  - `active`   : rose border + rose text + subtle fill. Selected state.
  *  - `semantic` : maps to error / warn / ok / info for system states.
  */
 

@@ -7,7 +7,7 @@ import { cn } from '../../lib/utils';
  * AMONG Button — pill-shaped, editorial, three variants.
  *
  * Variants:
- *  - `primary`  : inverted pill — deep-black fill, white text. The primary CTA.
+ *  - `primary`  : inverted pill — espresso fill, cream type. The primary CTA.
  *  - `secondary`: ghost pill — border only, fills on hover. Secondary actions.
  *  - `ghost`    : no border, text only. Tertiary / navigation actions.
  *  - `danger`   : muted red border + text. Destructive actions (e.g. account delete).
@@ -37,7 +37,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   ].join(' '),
   danger: [
     'border border-[var(--color-error)] bg-transparent text-[var(--color-error)]',
-    'hover:bg-[var(--color-error)] hover:text-white',
+    'hover:bg-[var(--color-error)] hover:text-[var(--color-bg)]',
     'focus-visible:outline-[var(--color-error)]',
   ].join(' '),
 };

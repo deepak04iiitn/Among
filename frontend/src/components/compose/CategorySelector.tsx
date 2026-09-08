@@ -11,7 +11,7 @@ import { POST_CATEGORY_MAX, POST_CATEGORY_MIN } from '../../constants/limits';
  * Design (Plan §7B.6 — Compose Page):
  * - Each category: typographic pill with `font-ui text-ui rounded-pill border border-border`.
  * - Selected: `border-accent text-accent bg-accent-subtle`. No colored chips.
- * - No icons, no color fills beyond the indigo selected state.
+ * - No icons, no color fills beyond the rose selected state.
  * - Shows `"X of Y selected"` count at the bottom — updates live.
  */
 

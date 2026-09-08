@@ -71,14 +71,14 @@ describe('avatarUtils', () => {
       expect(svg).toContain('height="96"');
     });
 
-    it('includes indigo dot when hasIndigoDot is true', () => {
+    it('includes rose accent dot when hasIndigoDot is true', () => {
       const svg = buildAvatarSvg({ ...params, hasIndigoDot: true }, 40);
-      expect(svg).toContain('#4F46E5');
+      expect(svg).toContain('#9B5360');
     });
 
-    it('does not include indigo dot when hasIndigoDot is false', () => {
+    it('does not include rose accent dot when hasIndigoDot is false', () => {
       const svg = buildAvatarSvg({ ...params, hasIndigoDot: false }, 40);
-      expect(svg).not.toContain('#4F46E5');
+      expect(svg).not.toContain('#9B5360');
     });
 
     it('is deterministic for the same params and size', () => {

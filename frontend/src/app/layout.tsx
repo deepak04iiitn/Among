@@ -5,7 +5,7 @@ import SkipToMain from '../components/layout/SkipToMain';
 import './globals.css';
 
 // ─── Fonts — self-served via next/font ─────────────────────────────────────
-// Theme: "Afterhours" — see /docs/theme.md for the full design system.
+// Theme: "Warm Linen" — see /docs/theme.md for the full design system.
 // UI font — clean, readable at small sizes, excellent number figures
 const fontUI = Karla({
   subsets: ['latin'],
@@ -91,8 +91,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width:      'device-width',
   initialScale: 1,
-  // themeColor matches the pure-white background — no dark mode
-  themeColor: '#FFFFFF',
+  // themeColor matches the cream linen background — no dark mode
+  themeColor: '#F5F0E8',
 };
 
 // ─── Root Layout ─────────────────────────────────────────────────────────────

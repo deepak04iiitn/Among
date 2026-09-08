@@ -5,22 +5,21 @@
  * Generates the same abstract params from the same seed so the
  * frontend can render a deterministic SVG without a round-trip.
  *
- * Color palette: indigo accent + neutral grays (no rainbow palette).
+ * Color palette: dried-rose accent + warm linen neutrals (no rainbow palette).
  * Shapes: abstract geometric — NO faces, NO silhouettes, NO human-suggestive forms.
  */
 
 // ─── Approved color palette ───────────────────────────────────────────────────
-// Grays from the border palette + optional single indigo dot.
-// These match the values in frontend/tailwind.config.ts.
+// Warm fills from docs/theme.md §7 Avatars + optional single rose accent dot.
 
 const APPROVED_FILL_COLORS: readonly string[] = [
-  '#E8E8E8', // color-border
-  '#D0D0D0', // color-border-strong
-  '#999999', // color-text-muted
-  '#555555', // color-text-secondary
+  '#E0D6C8', // color-border
+  '#C9B9A8', // color-border-strong
+  '#6F6960', // color-text-muted
+  '#4F4A44', // color-text-secondary
 ] as const;
 
-const INDIGO_ACCENT = '#4F46E5'; // color-accent
+const ACCENT_DOT = '#9B5360'; // color-accent
 
 // ─── Shape types ──────────────────────────────────────────────────────────────
 // All abstract — never any humanoid or face-like forms.
@@ -84,14 +83,14 @@ export function generateAvatarData(seed: string): AvatarData {
   const rotation     = Math.floor(rng() * 360);
   const primaryIdx   = Math.floor(rng() * APPROVED_FILL_COLORS.length);
   const secondIdx    = Math.floor(rng() * APPROVED_FILL_COLORS.length);
-  const hasIndigoDot = rng() > 0.6; // 40% chance of indigo dot
+  const hasIndigoDot = rng() > 0.6; // 40% chance of rose accent dot
   const patternIndex = Math.floor(rng() * 6);
 
   return {
     shape,
     rotation,
-    primaryColor: APPROVED_FILL_COLORS[primaryIdx] ?? '#E8E8E8',
-    secondColor:  APPROVED_FILL_COLORS[secondIdx]  ?? '#D0D0D0',
+    primaryColor: APPROVED_FILL_COLORS[primaryIdx] ?? '#E0D6C8',
+    secondColor:  APPROVED_FILL_COLORS[secondIdx]  ?? '#C9B9A8',
     hasIndigoDot,
     patternIndex,
     seed,
@@ -103,5 +102,5 @@ export function generateAvatarData(seed: string): AvatarData {
  * colors are from the allowed palette.
  */
 export function getApprovedColors(): readonly string[] {
-  return [...APPROVED_FILL_COLORS, INDIGO_ACCENT];
+  return [...APPROVED_FILL_COLORS, ACCENT_DOT];
 }

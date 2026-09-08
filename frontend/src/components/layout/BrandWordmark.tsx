@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
  *
  * /Among_Logo.png is a stacked icon-over-wordmark asset sized for a much
  * taller placement; scaled to nav/footer height it's both illegible and
- * gradient-colored, which the Afterhours theme explicitly forbids.
+ * gradient-colored, which Warm Linen explicitly forbids.
  * See /docs/theme.md §7 "Navigation — Floating Capsule (locked pattern)".
  */
 export interface BrandWordmarkProps {

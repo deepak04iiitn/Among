@@ -189,7 +189,7 @@ export default function ConversationThread({
               <button
                 onClick={handleSend}
                 disabled={!body.trim() || status === 'sending'}
-                className="px-5 py-2 rounded-full bg-[var(--color-text)] text-white text-ui font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                className="px-5 py-2 rounded-full bg-[var(--color-text)] text-[var(--color-bg)] text-ui font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
                 aria-label="Send message"
               >
                 {status === 'sending' ? 'Sending…' : 'Send'}

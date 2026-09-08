@@ -4,7 +4,7 @@
  * This is purely for personalisation — it is never stored as a public profile field.
  *
  * Design: Four full-width typographic cards, editorial serif for the label,
- * subtle description below. Selected state shows an indigo left border.
+ * subtle description below. Selected state shows a rose left border.
  */
 'use client';
 

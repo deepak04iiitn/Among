@@ -77,52 +77,43 @@ export default function PromptCard({ onAccepted }: PromptCardProps): React.JSX.E
 
   return (
     <article
-      className="
-        group relative overflow-hidden rounded-2xl border border-indigo-100 bg-white
-        shadow-sm hover:shadow-md transition-shadow duration-300
-        p-6 md:p-8
-      "
+      className="group relative rounded-lg border border-border p-6 md:p-8"
       aria-label="Someone needs you today"
       role="region"
     >
-      {/* Category badge */}
+      {/* Category — typographic only, no color fill */}
       <div className="mb-4 flex items-center gap-2">
-        <span
-          className="
-            inline-block rounded-full bg-indigo-50 px-3 py-0.5
-            text-xs font-semibold uppercase tracking-wider text-indigo-600
-          "
-        >
+        <span className="text-caption text-text-muted">
           {categoryName}
         </span>
-        <span className="text-xs text-neutral-400">Someone is going through this now</span>
+        <span className="text-caption text-text-muted">Someone is going through this now</span>
       </div>
 
       {/* Headline */}
-      <h2 className="mb-1 font-editorial text-title-xl text-neutral-900 leading-tight">
+      <h2 className="mb-1 font-editorial text-title-xl text-text leading-tight">
         Someone needs you today.
       </h2>
-      <p className="mb-4 text-sm text-neutral-500">
+      <p className="mb-4 text-ui text-text-secondary">
         You've been through something similar. Would you like to connect?
       </p>
 
       {/* Anonymized body preview */}
       <blockquote
         className="
-          mb-6 border-l-2 border-indigo-200 pl-4
-          text-base text-neutral-700 leading-relaxed italic
+          mb-6 border-l-2 border-border pl-4
+          text-body text-text leading-relaxed italic
           line-clamp-4
         "
         aria-label="Experience excerpt"
       >
         {prompt.bodyPreview}
         {prompt.bodyPreview.length >= 280 && (
-          <span className="not-italic text-neutral-400"> …</span>
+          <span className="not-italic text-text-muted"> …</span>
         )}
       </blockquote>
 
       {/* Privacy note */}
-      <p className="mb-5 text-xs text-neutral-400">
+      <p className="mb-5 text-caption text-text-muted">
         Conversations are anonymous, temporary, and never stored long-term.
       </p>
 
@@ -132,19 +123,13 @@ export default function PromptCard({ onAccepted }: PromptCardProps): React.JSX.E
           type="button"
           onClick={handleAccept}
           disabled={isLoading}
-          className="
-            inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5
-            text-sm font-semibold text-white shadow-sm
-            hover:bg-indigo-700 active:scale-[0.98]
-            transition-all duration-150
-            disabled:opacity-50 disabled:cursor-not-allowed
-          "
+          className="btn-primary"
           aria-label="Connect with this person"
         >
           {isLoading ? (
             <>
               <span
-                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--color-bg)] border-t-transparent"
                 aria-hidden="true"
               />
               Connecting…

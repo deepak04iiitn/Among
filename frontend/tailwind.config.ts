@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss';
 
 /**
  * AMONG Tailwind Configuration
- * Phase 2B — editorial, indigo-accented, pure-white design language.
+ * Warm Linen — cream paper, espresso ink, dried-rose accent. See /docs/theme.md.
  *
  * All token values reference CSS custom properties defined in globals.css.
  * Never add raw hex values or gradient tokens here.

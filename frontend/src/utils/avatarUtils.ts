@@ -3,7 +3,8 @@
  *
  * Avatars are generated from a seed string (the alias seed) using a seeded PRNG.
  * The same seed ALWAYS produces the same avatar — alias rotation changes the seed.
- * Colors: neutral grays only, with an optional indigo dot (#4F46E5).
+ * Colors: warm-neutral fills from the linen border palette, with an optional
+ * dried-rose accent dot (#9B5360).
  * Never: faces, silhouettes, anything suggesting age, gender, or identity.
  *
  * Phase 2B spec: §7B.7
@@ -23,10 +24,11 @@ export interface AvatarParams {
 }
 
 // ─── Color palette ────────────────────────────────────────────────────────────
-// Only neutral grays + optional indigo dot — never multi-color
+// Warm neutrals from Warm Linen + optional rose accent dot — never multi-color
+// Hexes match docs/theme.md §7 Avatars (SVG strings cannot use CSS variables).
 
-const GRAY_PALETTE = ['#E8E8E8', '#D0D0D0', '#999999', '#555555'] as const;
-const INDIGO_DOT   = '#4F46E5';
+const GRAY_PALETTE = ['#E0D6C8', '#C9B9A8', '#6F6960', '#4F4A44'] as const;
+const ACCENT_DOT   = '#9B5360';
 
 // ─── Seeded PRNG (mulberry32) ─────────────────────────────────────────────────
 // Fast, deterministic, sufficient for avatar generation.
@@ -129,8 +131,8 @@ export function buildAvatarSvg(params: AvatarParams, size: number): string {
   const renderer  = SHAPE_RENDERERS[params.shape] ?? SHAPE_RENDERERS[0];
   const shapeSvg  = renderer({ primary, secondary, rotation: params.rotation });
 
-  const indigoDot = params.hasIndigoDot
-    ? `<circle cx="40" cy="8" r="4" fill="${INDIGO_DOT}" />`
+  const accentDot = params.hasIndigoDot
+    ? `<circle cx="40" cy="8" r="4" fill="${ACCENT_DOT}" />`
     : '';
 
   return `<svg
@@ -144,7 +146,7 @@ export function buildAvatarSvg(params: AvatarParams, size: number): string {
   >
     <rect width="48" height="48" rx="24" fill="${GRAY_PALETTE[0]}" />
     ${shapeSvg}
-    ${indigoDot}
+    ${accentDot}
   </svg>`;
 }
 

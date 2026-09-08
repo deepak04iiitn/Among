@@ -13,7 +13,7 @@ interface AvatarSVGProps {
  * Abstract geometric avatar — rendered as inline SVG.
  *
  * - Deterministic: same seed → same avatar.
- * - No faces, no silhouettes — abstract shapes + neutral grays + optional indigo dot.
+ * - No faces, no silhouettes — abstract shapes + warm neutrals + optional rose accent dot.
  * - Sizes: sm=24px (inline/nav), md=40px (cards), lg=96px (alias reveal).
  * - aria-label and role="img" for accessibility.
  *

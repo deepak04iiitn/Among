@@ -16,12 +16,12 @@ import { BRAND_LOGO } from '../../constants/brand';
  * Primary navigation — "Floating Capsule" pattern.
  * Full spec: /docs/theme.md §7 "Navigation — Floating Capsule (locked pattern)".
  *
- * Desktop: a detached, blurred-glass pill, sticky with a top margin. An ember
+ * Desktop: a detached, blurred-glass pill, sticky with a top margin. A rose
  * highlight physically slides between links on hover and eases back to the
  * active route on mouse-leave. The capsule tightens once the page scrolls.
  *
  * Mobile: the same capsule shape, fixed to the bottom of the viewport,
- * collapsed to icon-only buttons with a filled ember Compose action.
+ * collapsed to icon-only buttons with a filled rose Compose action.
  */
 
 interface NavLink {
@@ -127,7 +127,7 @@ function AppCapsuleNav({
         className={[
           'grid grid-cols-[1fr_auto_1fr] items-center rounded-pill border border-[var(--color-border-strong)]',
           'backdrop-blur-[14px] backdrop-saturate-150',
-          'shadow-[0_6px_20px_-6px_rgba(0,0,0,0.5)]',
+          'shadow-capsule',
           'transition-[padding,background-color] duration-300 w-full max-w-[1600px]',
           isScrolled
             ? 'pl-5 pr-3 py-1.5 bg-[var(--color-surface-glass-strong)]'
@@ -173,7 +173,7 @@ function AppCapsuleNav({
           <button
             type="button"
             aria-label={unreadCount > 0 ? `Notifications — ${unreadCount} unread` : 'Notifications'}
-            className="relative p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-white/[0.04] transition-colors rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+            className="relative p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-text)]/[0.06] transition-colors rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
           >
             <Bell size={18} strokeWidth={1.5} aria-hidden="true" />
             {unreadCount > 0 && (
@@ -217,7 +217,7 @@ function MobileCapsuleNav({ isActive }: { isActive: (href: string) => boolean })
         className={[
           'flex items-center gap-1 p-1.5 rounded-pill border border-[var(--color-border-strong)]',
           'bg-[var(--color-surface-glass-strong)] backdrop-blur-[14px] backdrop-saturate-150',
-          'shadow-[0_6px_20px_-6px_rgba(0,0,0,0.5)]',
+          'shadow-capsule',
         ].join(' ')}
       >
         {APP_NAV_LINKS.map(({ href, label, Icon }) => {
@@ -241,7 +241,7 @@ function MobileCapsuleNav({ isActive }: { isActive: (href: string) => boolean })
         <Link
           href={ROUTES.COMPOSE}
           aria-label="Share a new experience"
-          className="flex items-center justify-center w-11 h-11 rounded-full bg-[var(--color-accent)] text-[#20140A] transition-colors hover:bg-[var(--color-accent-hover)]"
+          className="flex items-center justify-center w-11 h-11 rounded-full bg-[var(--color-accent)] text-[var(--color-bg)] transition-colors hover:bg-[var(--color-accent-hover)]"
         >
           <PenLine size={18} strokeWidth={1.75} aria-hidden="true" />
         </Link>
@@ -259,7 +259,7 @@ function PublicCapsuleNav(): React.JSX.Element {
         className={[
           'flex items-center justify-between gap-6 pl-8 pr-4 py-3.5 rounded-pill border border-[var(--color-border-strong)]',
           'bg-[var(--color-surface-glass)] backdrop-blur-[14px] backdrop-saturate-150',
-          'shadow-[0_6px_20px_-6px_rgba(0,0,0,0.5)] w-full max-w-[1600px] mx-auto',
+          'shadow-capsule w-full max-w-[1600px] mx-auto',
         ].join(' ')}
       >
         <Logo href={ROUTES.LANDING} height={BRAND_LOGO.NAV_HEIGHT_PX} priority />

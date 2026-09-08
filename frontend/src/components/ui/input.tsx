@@ -4,10 +4,10 @@ import * as React from 'react';
 import { cn } from '../../lib/utils';
 
 /**
- * AMONG Input — rounded-md, border-border, indigo focus ring.
+ * AMONG Input — rounded-md, border-border, rose focus ring.
  *
  * Design: understated and invisible — just a text field.
- * Focus: single-pixel indigo ring (`focus-visible:ring-1 ring-accent`) — no
+ * Focus: single-pixel rose ring (`focus-visible:ring-1 ring-accent`) — no
  *        heavy colored flood, no border-color change on focus.
  * Error: `border-error` ring-error for validation states.
  */

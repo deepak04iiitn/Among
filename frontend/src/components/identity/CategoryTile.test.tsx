@@ -58,7 +58,7 @@ describe('CategoryTile', () => {
 
   // ─── Selected state visual ─────────────────────────────────────────────
 
-  it('has indigo border when selected', () => {
+  it('has accent border when selected', () => {
     render(<CategoryTile {...defaultProps} isSelected />);
     expect(screen.getByRole('checkbox').className).toContain('border-[var(--color-accent)]');
   });
@@ -68,7 +68,7 @@ describe('CategoryTile', () => {
     expect(screen.getByRole('checkbox').className).toContain('bg-[var(--color-accent-subtle)]');
   });
 
-  it('shows indigo dot indicator when selected', () => {
+  it('shows accent dot indicator when selected', () => {
     render(<CategoryTile {...defaultProps} isSelected />);
     // The dot is aria-hidden but should be present
     const dot = screen.getByRole('checkbox').querySelector('[aria-hidden="true"]');
@@ -76,7 +76,7 @@ describe('CategoryTile', () => {
     expect(dot?.className).toContain('bg-[var(--color-accent)]');
   });
 
-  it('does NOT show indigo dot when not selected', () => {
+  it('does NOT show accent dot when not selected', () => {
     render(<CategoryTile {...defaultProps} isSelected={false} />);
     const dot = screen.getByRole('checkbox').querySelector('[aria-hidden="true"]');
     expect(dot).not.toBeInTheDocument();

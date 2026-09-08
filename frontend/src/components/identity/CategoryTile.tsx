@@ -7,11 +7,11 @@ import { cn } from '../../lib/utils';
  * CategoryTile — used in the onboarding category selection flow.
  *
  * Design (Plan §7B.6 — Onboarding Category Selection):
- *  - Large typographic label in `font-editorial text-title` on white.
+ *  - Large typographic label in `font-editorial text-title` on linen.
  *  - Thin `border-border`, `rounded-lg`.
  *  - Descriptor line below: `text-caption text-text-muted`.
  *  - On selection: border → `border-accent`, bg → `bg-accent-subtle`.
- *    A small indigo dot appears in the top-right corner.
+ *    A small rose accent dot appears in the top-right corner.
  *    (No checkmark icon — a dot feels more human, less form-checkbox.)
  *  - Selection count shown externally (CategorySelector) — not per-tile.
  */
