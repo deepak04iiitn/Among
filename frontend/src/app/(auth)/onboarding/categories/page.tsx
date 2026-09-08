@@ -9,10 +9,10 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import CategoryTile from '../../../components/identity/CategoryTile';
-import { EXPERIENCE_CATEGORIES, type ExperienceCategory } from '../../../constants/experienceCategories';
-import { ONBOARDING_CATEGORY_MIN, ONBOARDING_CATEGORY_MAX } from '../../../constants/limits';
-import { ROUTES } from '../../../constants/routes';
+import CategoryTile from '../../../../components/identity/CategoryTile';
+import { EXPERIENCE_CATEGORIES, type ExperienceCategory } from '../../../../constants/experienceCategories';
+import { ONBOARDING_CATEGORY_MIN, ONBOARDING_CATEGORY_MAX } from '../../../../constants/limits';
+import { ROUTES } from '../../../../constants/routes';
 
 const STORAGE_KEY = 'among_onboarding_categories';
 

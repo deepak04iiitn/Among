@@ -4,8 +4,8 @@
  * These functions map directly to the backend routes in
  * `backend/src/modules/users/user.routes.ts`.
  *
- * Privacy: no function here ever receives or returns email or firebaseUid.
- * The Firebase ID token is passed only as a request header, not stored as data.
+ * Privacy: responses never include email, firebaseUid, or passwordHash.
+ * Email is sent only on register/login request bodies.
  */
 import { apiClient } from './apiClient';
 import { API } from '../constants/apiEndpoints';
@@ -75,6 +75,28 @@ export async function refreshSession(refreshToken: string): Promise<RefreshRespo
   const response = await apiClient.post<RefreshResponse>(
     API.AUTH_REFRESH,
     { refreshToken }
+  );
+  return response.data;
+}
+
+export async function registerWithEmail(
+  email: string,
+  password: string
+): Promise<SessionResponse> {
+  const response = await apiClient.post<SessionResponse>(
+    API.AUTH_REGISTER,
+    { email, password }
+  );
+  return response.data;
+}
+
+export async function loginWithEmail(
+  email: string,
+  password: string
+): Promise<SessionResponse> {
+  const response = await apiClient.post<SessionResponse>(
+    API.AUTH_LOGIN,
+    { email, password }
   );
   return response.data;
 }

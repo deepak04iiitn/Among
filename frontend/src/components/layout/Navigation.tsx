@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bell, PenLine, Home, Compass, MessageSquare, User, type LucideIcon } from 'lucide-react';
-import { useAppSelector } from '../../store';
+import { useAppDispatch, useAppSelector } from '../../store';
 import { selectIsAuthenticated } from '../../features/auth/authSlice';
 import { selectUnreadCount } from '../../features/notifications/notificationsSlice';
+import { signOutThunk } from '../../features/auth/authThunks';
 import { ROUTES } from '../../constants/routes';
+import Logo from './Logo';
 
 /**
  * Primary navigation.
@@ -34,10 +36,17 @@ const APP_NAV_LINKS: NavLink[] = [
 
 export default function Navigation() {
   const pathname         = usePathname();
+  const router           = useRouter();
+  const dispatch         = useAppDispatch();
   const isAuthenticated  = useAppSelector(selectIsAuthenticated);
   const unreadCount      = useAppSelector(selectUnreadCount);
 
   const isActive = (href: string): boolean => pathname === href || pathname.startsWith(href + '/');
+
+  async function handleSignOut(): Promise<void> {
+    await dispatch(signOutThunk());
+    router.push(ROUTES.LANDING);
+  }
 
   // Public nav (unauthenticated)
   if (!isAuthenticated) {
@@ -48,13 +57,7 @@ export default function Navigation() {
       >
         <div className="content-column h-14 flex items-center justify-between">
           {/* Brand */}
-          <Link
-            href={ROUTES.LANDING}
-            className="font-editorial text-title text-[var(--color-text)] hover:opacity-70 transition-opacity"
-            aria-label="AMONG — go to home"
-          >
-            Among
-          </Link>
+          <Logo href={ROUTES.LANDING} height={24} />
 
           {/* Right side actions */}
           <div className="flex items-center gap-4">
@@ -85,13 +88,7 @@ export default function Navigation() {
       >
         <div className="content-column max-w-shell h-14 flex items-center justify-between">
           {/* Brand */}
-          <Link
-            href={ROUTES.HOME}
-            className="font-editorial text-title text-[var(--color-text)] hover:opacity-70 transition-opacity mr-8"
-            aria-label="AMONG — go to home feed"
-          >
-            Among
-          </Link>
+          <Logo href={ROUTES.HOME} height={24} className="mr-8" />
 
           {/* Primary nav links — text only, weight signals active */}
           <nav aria-label="Primary navigation" className="flex items-center gap-6 flex-1">
@@ -145,6 +142,14 @@ export default function Navigation() {
               <PenLine size={14} strokeWidth={1.5} aria-hidden="true" />
               Share
             </Link>
+            <button
+              type="button"
+              onClick={() => void handleSignOut()}
+              className="text-ui text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors min-h-[44px] px-2"
+              aria-label="Log out of AMONG"
+            >
+              Log out
+            </button>
           </div>
         </div>
       </header>

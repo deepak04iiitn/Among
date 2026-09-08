@@ -13,6 +13,11 @@ export const DAILY_CONVERSATION_REQUEST_LIMIT = 10;
 export const MESSAGE_MAX_CHARS = 1000;
 export const ONBOARDING_CATEGORY_MIN = 3;
 export const ONBOARDING_CATEGORY_MAX = 5;
+
+/** Email/password auth — AMONG requires 8 */
+export const PASSWORD_MIN_CHARS = 8;
+export const PASSWORD_MAX_CHARS = 128;
+export const EMAIL_MAX_CHARS = 254;
 export const SECONDARY_DISCOVERY_ITEMS = 5;
 export const CATEGORY_PAGE_BATCH_SIZE = 20;
 export const MAX_SNY_PROMPTS_PER_DAY = 1;

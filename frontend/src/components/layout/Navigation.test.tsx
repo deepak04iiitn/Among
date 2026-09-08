@@ -12,6 +12,15 @@ import { render, screen } from '@testing-library/react';
 // ── Mock next/navigation ───────────────────────────────────────────────────
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn().mockReturnValue('/home'),
+  useRouter:   jest.fn().mockReturnValue({ push: jest.fn() }),
+}));
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ alt }: { alt?: string }) => {
+    const Img = require('react').createElement('img', { alt: alt ?? '' });
+    return Img;
+  },
 }));
 
 // ── Mock next/link ─────────────────────────────────────────────────────────
@@ -81,10 +90,10 @@ describe('Navigation (unauthenticated)', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument();
   });
 
-  it('renders the brand name "Among"', () => {
+  it('renders the brand logo', () => {
     asGuest();
     render(<Navigation />);
-    expect(screen.getByText('Among')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /among/i })).toBeInTheDocument();
   });
 
   it('renders the "Enter Among" CTA for guests', () => {
@@ -150,6 +159,12 @@ describe('Navigation (authenticated)', () => {
     asUser();
     render(<Navigation />);
     expect(screen.getAllByText('Share').length).toBeGreaterThan(0);
+  });
+
+  it('renders a log out control', () => {
+    asUser();
+    render(<Navigation />);
+    expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
   });
 });
 

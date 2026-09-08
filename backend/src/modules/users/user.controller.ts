@@ -10,12 +10,32 @@ import type { Request, Response, NextFunction } from 'express';
 import { verifyFirebaseToken }              from '../../config/firebase';
 import { issueTokenPair, verifyRefreshToken } from '../../services/jwt.service';
 import * as userService from './user.service';
+import type { IUser } from './user.model';
 import type {
   CreateSessionInput,
+  EmailPasswordInput,
   CompleteOnboardingInput,
   UpdateCategoriesInput,
   UpdateSnyOptInInput,
 } from './user.schema';
+
+function sessionPayload(user: IUser): Record<string, unknown> {
+  const isBanned = user.enforcementStatus?.isBanned ?? false;
+  const tokens = issueTokenPair({
+    accountId:              String(user._id),
+    role:                   user.role,
+    hasCompletedOnboarding: user.hasCompletedOnboarding,
+  });
+  return {
+    accountId:              String(user._id),
+    role:                   user.role,
+    hasCompletedOnboarding: user.hasCompletedOnboarding,
+    isBanned,
+    accessToken:            tokens.accessToken,
+    refreshToken:           tokens.refreshToken,
+    expiresIn:              tokens.expiresIn,
+  };
+}
 
 // ─── POST /api/auth/session ───────────────────────────────────────────────────
 
@@ -35,24 +55,37 @@ export async function createSession(
     const decoded = await verifyFirebaseToken(idToken);
     const user    = await userService.findOrCreateUser(decoded.uid, decoded.email ?? '');
 
-    const isBanned = user.enforcementStatus?.isBanned ?? false;
+    res.status(200).json(sessionPayload(user));
+  } catch (err) {
+    next(err);
+  }
+}
 
-    // Issue backend JWT pair — client uses these for all subsequent requests
-    const tokens = issueTokenPair({
-      accountId:            String(user._id),
-      role:                 user.role,
-      hasCompletedOnboarding: user.hasCompletedOnboarding,
-    });
+// ─── POST /api/auth/register ──────────────────────────────────────────────────
 
-    res.status(200).json({
-      accountId:              String(user._id),
-      role:                   user.role,
-      hasCompletedOnboarding: user.hasCompletedOnboarding,
-      isBanned,
-      accessToken:            tokens.accessToken,
-      refreshToken:           tokens.refreshToken,
-      expiresIn:              tokens.expiresIn,
-    });
+export async function registerWithEmail(
+  req: Request<object, object, EmailPasswordInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = await userService.registerWithEmail(req.body.email, req.body.password);
+    res.status(201).json(sessionPayload(user));
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ─── POST /api/auth/login ─────────────────────────────────────────────────────
+
+export async function loginWithEmail(
+  req: Request<object, object, EmailPasswordInput>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = await userService.loginWithEmail(req.body.email, req.body.password);
+    res.status(200).json(sessionPayload(user));
   } catch (err) {
     next(err);
   }

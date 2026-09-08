@@ -9,16 +9,35 @@ import { z } from 'zod';
 import {
   ONBOARDING_CATEGORY_MIN,
   ONBOARDING_CATEGORY_MAX,
+  PASSWORD_MIN_CHARS,
+  PASSWORD_MAX_CHARS,
+  EMAIL_MAX_CHARS,
 } from '../../constants/limits';
 
 // ─── POST /api/auth/session ───────────────────────────────────────────────────
 
 export const createSessionSchema = z.object({
-  /** Firebase ID token from the client */
+  /** Firebase ID token from the client (Google sign-in only) */
   idToken: z.string().min(1, 'Firebase ID token is required'),
 });
 
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
+
+// ─── POST /api/auth/register  +  POST /api/auth/login ────────────────────────
+
+export const emailPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email('Enter a valid email address')
+    .max(EMAIL_MAX_CHARS),
+  password: z
+    .string()
+    .min(PASSWORD_MIN_CHARS, `Password must be at least ${PASSWORD_MIN_CHARS} characters`)
+    .max(PASSWORD_MAX_CHARS),
+});
+
+export type EmailPasswordInput = z.infer<typeof emailPasswordSchema>;
 
 // ─── POST /api/users/me/onboarding ───────────────────────────────────────────
 

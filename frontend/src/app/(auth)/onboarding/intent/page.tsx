@@ -9,8 +9,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import IntentSelector from '../../../components/onboarding/IntentSelector';
-import { ROUTES } from '../../../constants/routes';
+import IntentSelector from '../../../../components/onboarding/IntentSelector';
+import { ROUTES } from '../../../../constants/routes';
 
 export default function OnboardingIntentPage() {
   const router = useRouter();

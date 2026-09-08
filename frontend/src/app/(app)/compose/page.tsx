@@ -11,7 +11,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '../../../hooks/store';
+import { useAppDispatch, useAppSelector } from '../../../store';
 import { createPostThunk } from '../../../features/posts/postsThunks';
 import { selectSubmitting, selectComposeError } from '../../../features/posts/postsSlice';
 import { ComposeForm, type ComposeFormValues } from '../../../components/compose/ComposeForm';

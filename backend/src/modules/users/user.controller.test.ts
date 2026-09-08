@@ -13,6 +13,8 @@ jest.mock('../../config/firebase', () => ({
 
 jest.mock('../../modules/users/user.service', () => ({
   findOrCreateUser:       jest.fn(),
+  registerWithEmail:      jest.fn(),
+  loginWithEmail:         jest.fn(),
   getPrivateProfile:      jest.fn(),
   completeOnboarding:     jest.fn(),
   rotateAlias:            jest.fn(),
@@ -20,6 +22,15 @@ jest.mock('../../modules/users/user.service', () => ({
   getSnyOptIns:           jest.fn(),
   setSnyOptIn:            jest.fn(),
   softDeleteAccount:      jest.fn(),
+}));
+
+jest.mock('../../services/jwt.service', () => ({
+  issueTokenPair: jest.fn(() => ({
+    accessToken:  'access-token',
+    refreshToken: 'refresh-token',
+    expiresIn:    900,
+  })),
+  verifyRefreshToken: jest.fn(),
 }));
 
 // Auth middleware mock — provides req.user for protected routes
@@ -62,6 +73,8 @@ jest.mock('../../middleware/rateLimiter.middleware', () => ({
 
 import {
   findOrCreateUser,
+  registerWithEmail,
+  loginWithEmail,
   getPrivateProfile,
   completeOnboarding,
   rotateAlias,
@@ -118,6 +131,61 @@ describe('POST /api/auth/session', () => {
 
     expect(JSON.stringify(res.body)).not.toContain('test@example.com');
     expect(JSON.stringify(res.body)).not.toContain('fb-uid');
+  });
+});
+
+const emailUser = {
+  _id:                    'user-id-1',
+  role:                   'user',
+  hasCompletedOnboarding: false,
+  enforcementStatus:      { isBanned: false },
+};
+
+describe('POST /api/auth/register', () => {
+  it('returns 400 when email or password is missing', async () => {
+    const res = await request(app).post('/api/auth/register').send({});
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 201 with a session and never leaks email or passwordHash', async () => {
+    (registerWithEmail as jest.Mock).mockResolvedValue(emailUser);
+
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'new@example.com', password: 'secret12' });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty('accountId', 'user-id-1');
+    expect(res.body).toHaveProperty('accessToken');
+    expect(res.body).toHaveProperty('refreshToken');
+    expect(res.body).not.toHaveProperty('email');
+    expect(res.body).not.toHaveProperty('passwordHash');
+    expect(res.body).not.toHaveProperty('firebaseUid');
+    expect(JSON.stringify(res.body)).not.toContain('new@example.com');
+    expect(JSON.stringify(res.body)).not.toContain('secret12');
+  });
+});
+
+describe('POST /api/auth/login', () => {
+  it('returns 400 when email or password is missing', async () => {
+    const res = await request(app).post('/api/auth/login').send({ email: 'a@b.com' });
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 200 with a session and never leaks email or passwordHash', async () => {
+    (loginWithEmail as jest.Mock).mockResolvedValue(emailUser);
+
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'test@example.com', password: 'secret12' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('accountId', 'user-id-1');
+    expect(res.body).not.toHaveProperty('email');
+    expect(res.body).not.toHaveProperty('passwordHash');
+    expect(res.body).not.toHaveProperty('firebaseUid');
+    expect(JSON.stringify(res.body)).not.toContain('test@example.com');
+    expect(JSON.stringify(res.body)).not.toContain('secret12');
   });
 });
 

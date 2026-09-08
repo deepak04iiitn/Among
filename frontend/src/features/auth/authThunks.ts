@@ -1,17 +1,9 @@
 /**
- * authThunks.ts — Redux thunks for Firebase authentication + session management.
+ * authThunks.ts — Session management.
  *
- * Flow:
- *  1. User clicks "Sign in with Google"
- *  2. Firebase handles OAuth; client receives Firebase ID token (one-time use)
- *  3. Firebase ID token sent to POST /api/auth/session
- *  4. Backend verifies Firebase token, issues backend JWT pair (access + refresh)
- *  5. Redux auth state updated; apiClient uses backend JWT on all subsequent calls
- *  6. Access token silently refreshed via POST /api/auth/refresh before expiry
- *
- * Privacy: Firebase UID is only used in the auth layer. It is never dispatched
- * to the store's public-facing `user` object in any form that routes or
- * components can read.
+ * Google: Firebase popup → POST /api/auth/session → backend JWT.
+ * Email/password: POST /api/auth/register or /login (no Firebase) → backend JWT.
+ * Refresh tokens are stored in localStorage so email sessions survive reload.
  */
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
@@ -33,17 +25,45 @@ import {
 import {
   createSession,
   refreshSession,
+  loginWithEmail as loginWithEmailApi,
   getMe,
   extractAlias,
+  type SessionResponse,
 } from '../../lib/authApi';
+import {
+  storeRefreshToken,
+  readStoredRefreshToken,
+  clearStoredRefreshToken,
+} from '../../lib/tokenStorage';
+import { AUTH_ERROR_MESSAGE, messageForAuthError } from '../../constants/auth';
 import type { AppDispatch, RootState } from '../../store';
 
-// ─── Sign In ─────────────────────────────────────────────────────────────────
+function applySession(dispatch: AppDispatch, session: SessionResponse, idToken = ''): void {
+  storeRefreshToken(session.refreshToken);
+  dispatch(
+    authSuccess({
+      user: {
+        accountId:              session.accountId,
+        firebaseUid:            '',
+        role:                   session.role,
+        isBanned:               session.isBanned,
+        hasCompletedOnboarding: session.hasCompletedOnboarding,
+      },
+      idToken,
+      accessToken:  session.accessToken,
+      refreshToken: session.refreshToken,
+      expiresIn:    session.expiresIn,
+    })
+  );
+}
 
-/**
- * Sign in with Google via Firebase, then exchange the Firebase ID token
- * for a backend JWT pair. Dispatches `authSuccess` on completion.
- */
+async function loadIdentityIfReady(dispatch: AppDispatch, onboarded: boolean): Promise<void> {
+  if (!onboarded) return;
+  const profile = await getMe();
+  const alias   = extractAlias(profile);
+  if (alias) dispatch(identityLoaded(alias));
+}
+
 export const signInWithGoogleThunk = createAsyncThunk<
   void,
   void,
@@ -52,54 +72,44 @@ export const signInWithGoogleThunk = createAsyncThunk<
   dispatch(authLoading());
 
   try {
-    // Step 1: Firebase Google OAuth — get Firebase ID token
     const firebaseUser = await signInWithGoogle();
     const idToken      = await firebaseUser.getIdToken();
-
-    // Step 2: Exchange Firebase token for AMONG backend JWT pair (one-time)
-    const session = await createSession(idToken);
+    const session      = await createSession(idToken);
 
     if (session.isBanned) {
-      dispatch(authError('Your account has been suspended.'));
+      dispatch(authError(AUTH_ERROR_MESSAGE.ACCOUNT_SUSPENDED));
       return;
     }
 
-    dispatch(
-      authSuccess({
-        user: {
-          accountId:              session.accountId,
-          firebaseUid:            '', // Deliberately empty — not exposed in state
-          role:                   session.role,
-          isBanned:               session.isBanned,
-          hasCompletedOnboarding: session.hasCompletedOnboarding,
-        },
-        idToken,
-        accessToken:  session.accessToken,
-        refreshToken: session.refreshToken,
-        expiresIn:    session.expiresIn,
-      })
-    );
-
-    // Step 3: Load identity if onboarding is complete
-    if (session.hasCompletedOnboarding) {
-      const profile = await getMe();
-      const alias   = extractAlias(profile);
-      if (alias) {
-        dispatch(identityLoaded(alias));
-      }
-    }
+    applySession(dispatch, session, idToken);
+    await loadIdentityIfReady(dispatch, session.hasCompletedOnboarding);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Sign-in failed. Please try again.';
-    dispatch(authError(message));
+    dispatch(authError(messageForAuthError(err)));
   }
 });
 
-// ─── Sign Out ────────────────────────────────────────────────────────────────
+export const signInWithEmailThunk = createAsyncThunk<
+  void,
+  { email: string; password: string },
+  { dispatch: AppDispatch }
+>('auth/signInWithEmail', async ({ email, password }, { dispatch }) => {
+  dispatch(authLoading());
 
-/**
- * Sign out of Firebase and clear all auth + identity state.
- */
+  try {
+    const session = await loginWithEmailApi(email, password);
+
+    if (session.isBanned) {
+      dispatch(authError(AUTH_ERROR_MESSAGE.ACCOUNT_SUSPENDED));
+      return;
+    }
+
+    applySession(dispatch, session);
+    await loadIdentityIfReady(dispatch, session.hasCompletedOnboarding);
+  } catch (err) {
+    dispatch(authError(messageForAuthError(err)));
+  }
+});
+
 export const signOutThunk = createAsyncThunk<
   void,
   void,
@@ -108,17 +118,12 @@ export const signOutThunk = createAsyncThunk<
   try {
     await signOutFirebase();
   } finally {
+    clearStoredRefreshToken();
     dispatch(authSignedOut());
     dispatch(identityCleared());
   }
 });
 
-// ─── Restore Session ─────────────────────────────────────────────────────────
-
-/**
- * Called on app load. Checks Firebase `onAuthStateChanged` for an existing
- * session, re-exchanges for a fresh backend JWT pair, and restores Redux state.
- */
 export const restoreSessionThunk = createAsyncThunk<
   void,
   void,
@@ -127,66 +132,60 @@ export const restoreSessionThunk = createAsyncThunk<
   dispatch(authLoading());
 
   try {
-    // Get Firebase ID token — null if user is not signed in
-    const idToken = await getIdToken();
+    const storedRefresh = readStoredRefreshToken();
+    if (storedRefresh) {
+      const tokens = await refreshSession(storedRefresh);
+      storeRefreshToken(tokens.refreshToken);
+      dispatch(backendTokenRefreshed(tokens));
 
+      const profile = await getMe();
+      dispatch(
+        authSuccess({
+          user: {
+            accountId:              profile.accountId,
+            firebaseUid:            '',
+            role:                   profile.role,
+            isBanned:               false,
+            hasCompletedOnboarding: profile.hasCompletedOnboarding,
+          },
+          idToken:      '',
+          accessToken:  tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          expiresIn:    tokens.expiresIn,
+        })
+      );
+      await loadIdentityIfReady(dispatch, profile.hasCompletedOnboarding);
+      return;
+    }
+
+    const idToken = await getIdToken();
     if (!idToken) {
       dispatch(authSignedOut());
       return;
     }
 
-    // Re-exchange Firebase token for a fresh backend JWT pair on every app load
     const session = await createSession(idToken);
-
     if (session.isBanned) {
       dispatch(authSignedOut());
       return;
     }
 
-    dispatch(
-      authSuccess({
-        user: {
-          accountId:              session.accountId,
-          firebaseUid:            '',
-          role:                   session.role,
-          isBanned:               session.isBanned,
-          hasCompletedOnboarding: session.hasCompletedOnboarding,
-        },
-        idToken,
-        accessToken:  session.accessToken,
-        refreshToken: session.refreshToken,
-        expiresIn:    session.expiresIn,
-      })
-    );
-
-    // Restore identity if onboarding is complete
-    if (session.hasCompletedOnboarding) {
-      const profile = await getMe();
-      const alias   = extractAlias(profile);
-      if (alias) {
-        dispatch(identityLoaded(alias));
-      }
-    }
+    applySession(dispatch, session, idToken);
+    await loadIdentityIfReady(dispatch, session.hasCompletedOnboarding);
   } catch {
+    clearStoredRefreshToken();
     dispatch(authSignedOut());
   }
 });
 
-// ─── Silent Token Refresh ─────────────────────────────────────────────────────
-
-/**
- * Silently renew the backend access token using the stored refresh token.
- * Called by the apiClient interceptor when the access token is about to expire
- * (or has expired). Falls back to signing out on refresh token failure.
- */
 export const silentTokenRefreshThunk = createAsyncThunk<
   void,
   void,
   { dispatch: AppDispatch; state: RootState }
 >('auth/silentTokenRefresh', async (_, { dispatch, getState }) => {
   try {
-    const { auth } = getState();
-    const currentRefreshToken = auth.refreshToken;
+    const currentRefreshToken =
+      getState().auth.refreshToken ?? readStoredRefreshToken();
 
     if (!currentRefreshToken) {
       dispatch(authSignedOut());
@@ -194,14 +193,14 @@ export const silentTokenRefreshThunk = createAsyncThunk<
     }
 
     const tokens = await refreshSession(currentRefreshToken);
-
+    storeRefreshToken(tokens.refreshToken);
     dispatch(backendTokenRefreshed({
       accessToken:  tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresIn:    tokens.expiresIn,
     }));
   } catch {
-    // Refresh token expired or invalid — force sign-out
+    clearStoredRefreshToken();
     dispatch(authSignedOut());
     dispatch(identityCleared());
   }

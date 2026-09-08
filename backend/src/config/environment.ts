@@ -4,7 +4,10 @@
  * Validates and exports all environment variables at startup.
  * The app will throw and refuse to start if any required variable is missing.
  * Never access process.env directly elsewhere — always import from here.
+ *
+ * dotenv/config MUST be the first import so .env is populated before Zod validates.
  */
+import 'dotenv/config';
 import { z } from 'zod';
 
 const EnvironmentSchema = z.object({

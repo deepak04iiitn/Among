@@ -14,9 +14,17 @@ jest.mock('../../lib/firebaseClient', () => ({
 }));
 
 jest.mock('../../lib/authApi', () => ({
-  createSession: jest.fn(),
-  getMe:         jest.fn(),
-  extractAlias:  jest.fn(),
+  createSession:   jest.fn(),
+  getMe:           jest.fn(),
+  extractAlias:    jest.fn(),
+  loginWithEmail:  jest.fn(),
+  refreshSession:  jest.fn(),
+}));
+
+jest.mock('../../lib/tokenStorage', () => ({
+  storeRefreshToken:      jest.fn(),
+  readStoredRefreshToken: jest.fn(() => null),
+  clearStoredRefreshToken: jest.fn(),
 }));
 
 import {
@@ -24,12 +32,25 @@ import {
   signOut as signOutFirebase,
   getIdToken,
 } from '../../lib/firebaseClient';
-import { createSession, getMe, extractAlias } from '../../lib/authApi';
+import {
+  createSession,
+  getMe,
+  extractAlias,
+  loginWithEmail,
+  refreshSession,
+} from '../../lib/authApi';
+import {
+  storeRefreshToken,
+  readStoredRefreshToken,
+  clearStoredRefreshToken,
+} from '../../lib/tokenStorage';
 import {
   signInWithGoogleThunk,
+  signInWithEmailThunk,
   signOutThunk,
   restoreSessionThunk,
 } from './authThunks';
+import { AUTH_ERROR_MESSAGE } from '../../constants/auth';
 
 const mockSignInWithGoogle = signInWithGoogle as jest.Mock;
 const mockSignOut          = signOutFirebase   as jest.Mock;
@@ -37,13 +58,34 @@ const mockGetIdToken       = getIdToken        as jest.Mock;
 const mockCreateSession    = createSession     as jest.Mock;
 const mockGetMe            = getMe             as jest.Mock;
 const mockExtractAlias     = extractAlias      as jest.Mock;
+const mockLoginWithEmail   = loginWithEmail    as jest.Mock;
+const mockRefreshSession   = refreshSession    as jest.Mock;
+const mockReadRefresh      = readStoredRefreshToken as jest.Mock;
+const mockStoreRefresh     = storeRefreshToken as jest.Mock;
+const mockClearRefresh     = clearStoredRefreshToken as jest.Mock;
 
 function makeStore() {
   return configureStore({ reducer: rootReducer });
 }
 
+function sessionPayload(overrides: Record<string, unknown> = {}) {
+  return {
+    accountId:              'acc-1',
+    role:                   'user',
+    hasCompletedOnboarding: true,
+    isBanned:               false,
+    accessToken:            'access-token',
+    refreshToken:           'refresh-token',
+    expiresIn:              900,
+    ...overrides,
+  };
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
+  mockReadRefresh.mockReturnValue(null);
+  mockExtractAlias.mockReturnValue(null);
+  mockGetMe.mockResolvedValue({ accountId: 'acc-1', role: 'user', hasCompletedOnboarding: true, currentAlias: null });
 });
 
 // ─── signInWithGoogleThunk ────────────────────────────────────────────────────
@@ -51,11 +93,7 @@ beforeEach(() => {
 describe('signInWithGoogleThunk', () => {
   it('dispatches authSuccess on successful sign-in', async () => {
     mockSignInWithGoogle.mockResolvedValue({ getIdToken: async () => 'id-token-123' });
-    mockCreateSession.mockResolvedValue({
-      accountId: 'acc-1', role: 'user', hasCompletedOnboarding: true, isBanned: false,
-    });
-    mockGetMe.mockResolvedValue({ currentAlias: null, categoryInterests: [] });
-    mockExtractAlias.mockReturnValue(null);
+    mockCreateSession.mockResolvedValue(sessionPayload());
 
     const store = makeStore();
     await store.dispatch(signInWithGoogleThunk());
@@ -63,21 +101,18 @@ describe('signInWithGoogleThunk', () => {
     const state = store.getState().auth;
     expect(state.status).toBe('authenticated');
     expect(state.user?.accountId).toBe('acc-1');
+    expect(mockStoreRefresh).toHaveBeenCalledWith('refresh-token');
   });
 
   it('does NOT store email or firebaseUid in auth state', async () => {
     mockSignInWithGoogle.mockResolvedValue({ getIdToken: async () => 'token' });
-    mockCreateSession.mockResolvedValue({
-      accountId: 'acc-1', role: 'user', hasCompletedOnboarding: true, isBanned: false,
-    });
-    mockGetMe.mockResolvedValue({ currentAlias: null });
-    mockExtractAlias.mockReturnValue(null);
+    mockCreateSession.mockResolvedValue(sessionPayload());
 
     const store = makeStore();
     await store.dispatch(signInWithGoogleThunk());
 
     const user = store.getState().auth.user;
-    expect(user?.firebaseUid).toBe(''); // Intentionally empty — privacy rule
+    expect(user?.firebaseUid).toBe('');
     expect(JSON.stringify(user)).not.toContain('@');
   });
 
@@ -93,9 +128,7 @@ describe('signInWithGoogleThunk', () => {
 
   it('dispatches authError when account is banned', async () => {
     mockSignInWithGoogle.mockResolvedValue({ getIdToken: async () => 'token' });
-    mockCreateSession.mockResolvedValue({
-      accountId: 'acc-1', role: 'user', hasCompletedOnboarding: true, isBanned: true,
-    });
+    mockCreateSession.mockResolvedValue(sessionPayload({ isBanned: true }));
 
     const store = makeStore();
     await store.dispatch(signInWithGoogleThunk());
@@ -106,9 +139,7 @@ describe('signInWithGoogleThunk', () => {
 
   it('loads alias into identity state when onboarding is complete', async () => {
     mockSignInWithGoogle.mockResolvedValue({ getIdToken: async () => 'token' });
-    mockCreateSession.mockResolvedValue({
-      accountId: 'acc-1', role: 'user', hasCompletedOnboarding: true, isBanned: false,
-    });
+    mockCreateSession.mockResolvedValue(sessionPayload());
     mockGetMe.mockResolvedValue({ currentAlias: { name: 'Blue Fox', avatarSeed: 'seed' } });
     mockExtractAlias.mockReturnValue({ name: 'Blue Fox', avatarSeed: 'seed', createdAt: '', expiresAt: null });
 
@@ -116,6 +147,35 @@ describe('signInWithGoogleThunk', () => {
     await store.dispatch(signInWithGoogleThunk());
 
     expect(store.getState().identity.alias?.name).toBe('Blue Fox');
+  });
+});
+
+// ─── signInWithEmailThunk ─────────────────────────────────────────────────────
+
+describe('signInWithEmailThunk', () => {
+  it('authenticates via the login API, not Firebase', async () => {
+    mockLoginWithEmail.mockResolvedValue(sessionPayload());
+
+    const store = makeStore();
+    await store.dispatch(signInWithEmailThunk({ email: 'a@b.com', password: 'secret12' }));
+
+    expect(mockLoginWithEmail).toHaveBeenCalledWith('a@b.com', 'secret12');
+    expect(mockSignInWithGoogle).not.toHaveBeenCalled();
+    expect(store.getState().auth.status).toBe('authenticated');
+    expect(mockStoreRefresh).toHaveBeenCalledWith('refresh-token');
+  });
+
+  it('maps invalid credentials to the auth error copy', async () => {
+    mockLoginWithEmail.mockRejectedValue({
+      code:    'ERR_INVALID_CREDENTIALS',
+      message: 'Email or password is incorrect.',
+    });
+
+    const store = makeStore();
+    await store.dispatch(signInWithEmailThunk({ email: 'a@b.com', password: 'wrong' }));
+
+    expect(store.getState().auth.status).toBe('unauthenticated');
+    expect(store.getState().auth.error).toBe(AUTH_ERROR_MESSAGE.WRONG_PASSWORD);
   });
 });
 
@@ -131,6 +191,7 @@ describe('signOutThunk', () => {
     expect(store.getState().auth.user).toBeNull();
     expect(store.getState().auth.status).toBe('unauthenticated');
     expect(store.getState().identity.alias).toBeNull();
+    expect(mockClearRefresh).toHaveBeenCalled();
   });
 
   it('clears state even if Firebase sign-out throws', async () => {
@@ -140,13 +201,14 @@ describe('signOutThunk', () => {
     await store.dispatch(signOutThunk());
 
     expect(store.getState().auth.user).toBeNull();
+    expect(mockClearRefresh).toHaveBeenCalled();
   });
 });
 
 // ─── restoreSessionThunk ─────────────────────────────────────────────────────
 
 describe('restoreSessionThunk', () => {
-  it('dispatches authSignedOut when no Firebase user exists', async () => {
+  it('dispatches authSignedOut when no refresh token or Firebase user exists', async () => {
     mockGetIdToken.mockResolvedValue(null);
 
     const store = makeStore();
@@ -155,13 +217,32 @@ describe('restoreSessionThunk', () => {
     expect(store.getState().auth.status).toBe('unauthenticated');
   });
 
-  it('restores auth state when Firebase token exists', async () => {
-    mockGetIdToken.mockResolvedValue('existing-token');
-    mockCreateSession.mockResolvedValue({
-      accountId: 'acc-2', role: 'user', hasCompletedOnboarding: true, isBanned: false,
+  it('restores from the stored refresh token without Firebase', async () => {
+    mockReadRefresh.mockReturnValue('stored-refresh');
+    mockRefreshSession.mockResolvedValue({
+      accessToken:  'new-access',
+      refreshToken: 'new-refresh',
+      expiresIn:    900,
     });
-    mockGetMe.mockResolvedValue({ currentAlias: null });
-    mockExtractAlias.mockReturnValue(null);
+    mockGetMe.mockResolvedValue({
+      accountId: 'acc-9',
+      role: 'user',
+      hasCompletedOnboarding: true,
+      currentAlias: null,
+    });
+
+    const store = makeStore();
+    await store.dispatch(restoreSessionThunk());
+
+    expect(mockRefreshSession).toHaveBeenCalledWith('stored-refresh');
+    expect(mockCreateSession).not.toHaveBeenCalled();
+    expect(store.getState().auth.status).toBe('authenticated');
+    expect(store.getState().auth.user?.accountId).toBe('acc-9');
+  });
+
+  it('falls back to Firebase token when no refresh token is stored', async () => {
+    mockGetIdToken.mockResolvedValue('existing-token');
+    mockCreateSession.mockResolvedValue(sessionPayload({ accountId: 'acc-2' }));
 
     const store = makeStore();
     await store.dispatch(restoreSessionThunk());
@@ -178,5 +259,6 @@ describe('restoreSessionThunk', () => {
     await store.dispatch(restoreSessionThunk());
 
     expect(store.getState().auth.status).toBe('unauthenticated');
+    expect(mockClearRefresh).toHaveBeenCalled();
   });
 });

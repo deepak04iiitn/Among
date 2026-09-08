@@ -71,19 +71,20 @@ describe('useAuth', () => {
     expect(dispatchSpy).toHaveBeenCalled();
   });
 
-  it('dispatches authSignedOut when firebase user is null', () => {
+  it('does not sign out when firebase user is null', () => {
     const store   = configureStore({ reducer: rootReducer });
     const dispatchSpy = jest.spyOn(store, 'dispatch');
     const wrapper = makeWrapper(store);
 
     renderHook(() => useAuth(), { wrapper });
+    const callsAfterMount = dispatchSpy.mock.calls.length;
 
     act(() => {
       const callback = mockOnAuthStateChanged.mock.calls[0]?.[0] as (user: null) => void;
       callback(null);
     });
 
-    expect(dispatchSpy).toHaveBeenCalled();
+    expect(dispatchSpy.mock.calls.length).toBe(callsAfterMount);
   });
 
   it('returns isAuthenticated=false when user is null', () => {

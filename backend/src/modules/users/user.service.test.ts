@@ -13,13 +13,33 @@ const mockFindById = jest.fn();
 const mockFindOne = jest.fn();
 const mockFind = jest.fn();
 
-jest.mock('../users/user.model', () => ({
-  UserModel: {
-    findOne:   (...args: unknown[]) => mockFindOne(...args),
-    findById:  (...args: unknown[]) => mockFindById(...args),
-    find:      (...args: unknown[]) => mockFind(...args),
-    updateOne: (...args: unknown[]) => mockUpdateOne(...args),
-  },
+jest.mock('../users/user.model', () => {
+  function UserModel(this: Record<string, unknown>, data: Record<string, unknown> = {}) {
+    Object.assign(this, {
+      _id: 'new-user-id',
+      role: 'user',
+      hasCompletedOnboarding: false,
+      enforcementStatus: {
+        isBanned: false,
+        bannedAt: null,
+        restrictionType: null,
+        restrictionExpiresAt: null,
+        warningCount: 0,
+      },
+      ...data,
+    });
+    this['save'] = mockSave;
+  }
+  UserModel.findOne   = (...args: unknown[]) => mockFindOne(...args);
+  UserModel.findById  = (...args: unknown[]) => mockFindById(...args);
+  UserModel.find      = (...args: unknown[]) => mockFind(...args);
+  UserModel.updateOne = (...args: unknown[]) => mockUpdateOne(...args);
+  return { UserModel };
+});
+
+jest.mock('../../services/password.service', () => ({
+  hashPassword:   jest.fn(async () => 'hashed-password'),
+  verifyPassword: jest.fn(),
 }));
 
 jest.mock('../../utils/aliasGenerator', () => ({
@@ -34,6 +54,12 @@ jest.mock('../../utils/avatarGenerator', () => ({
 
 import * as userService from './user.service';
 import { canRequestRotation } from '../../utils/aliasGenerator';
+import { hashPassword, verifyPassword } from '../../services/password.service';
+import {
+  ERR_EMAIL_IN_USE,
+  ERR_INVALID_CREDENTIALS,
+  ERR_GOOGLE_SIGN_IN_REQUIRED,
+} from '../../constants/errorCodes';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -204,6 +230,68 @@ describe('rotateAlias', () => {
     await userService.rotateAlias('user-id-1');
 
     expect(user.aliasRotationCount).toBe(4);
+  });
+});
+
+// ─── registerWithEmail ────────────────────────────────────────────────────────
+
+describe('registerWithEmail', () => {
+  it('throws ConflictError when email already exists', async () => {
+    mockFindOne.mockResolvedValue(makeUser());
+    await expect(
+      userService.registerWithEmail('test@example.com', 'secret12')
+    ).rejects.toMatchObject({ statusCode: 409, code: ERR_EMAIL_IN_USE });
+    expect(mockSave).not.toHaveBeenCalled();
+  });
+
+  it('hashes the password and creates a user when email is new', async () => {
+    mockFindOne.mockResolvedValue(null);
+    const user = await userService.registerWithEmail('New@Example.com', 'secret12');
+    expect(hashPassword).toHaveBeenCalledWith('secret12');
+    expect(user.email).toBe('new@example.com');
+    expect(user.passwordHash).toBe('hashed-password');
+    expect(user.firebaseUid).toBeUndefined();
+    expect(mockSave).toHaveBeenCalled();
+  });
+});
+
+// ─── loginWithEmail ───────────────────────────────────────────────────────────
+
+describe('loginWithEmail', () => {
+  function findOneSelect(user: unknown) {
+    return { select: jest.fn().mockResolvedValue(user) };
+  }
+
+  it('returns the user when the password matches', async () => {
+    const user = makeUser({ passwordHash: 'hashed-password' });
+    mockFindOne.mockReturnValue(findOneSelect(user));
+    (verifyPassword as jest.Mock).mockResolvedValue(true);
+
+    const result = await userService.loginWithEmail('test@example.com', 'secret12');
+    expect(result).toBe(user);
+    expect(verifyPassword).toHaveBeenCalledWith('secret12', 'hashed-password');
+  });
+
+  it('throws ERR_INVALID_CREDENTIALS when no user exists', async () => {
+    mockFindOne.mockReturnValue(findOneSelect(null));
+    await expect(
+      userService.loginWithEmail('nobody@example.com', 'secret12')
+    ).rejects.toMatchObject({ statusCode: 401, code: ERR_INVALID_CREDENTIALS });
+  });
+
+  it('throws ERR_INVALID_CREDENTIALS when the password is wrong', async () => {
+    mockFindOne.mockReturnValue(findOneSelect(makeUser({ passwordHash: 'hashed-password' })));
+    (verifyPassword as jest.Mock).mockResolvedValue(false);
+    await expect(
+      userService.loginWithEmail('test@example.com', 'wrong-pass')
+    ).rejects.toMatchObject({ statusCode: 401, code: ERR_INVALID_CREDENTIALS });
+  });
+
+  it('throws ERR_GOOGLE_SIGN_IN_REQUIRED when the account has no password hash', async () => {
+    mockFindOne.mockReturnValue(findOneSelect(makeUser({ passwordHash: undefined })));
+    await expect(
+      userService.loginWithEmail('test@example.com', 'secret12')
+    ).rejects.toMatchObject({ statusCode: 401, code: ERR_GOOGLE_SIGN_IN_REQUIRED });
   });
 });
 

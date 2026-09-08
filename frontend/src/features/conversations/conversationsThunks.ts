@@ -30,7 +30,7 @@ export function requestMatchThunk(params: {
   contextCategoryId: string;
   contextPostId?:    string;
 }) {
-  return async (dispatch: AppDispatch): Promise<void> => {
+  return async (dispatch: AppDispatch): Promise<string | null> => {
     try {
       const result = await conversationsApi.createMatchRequest(params);
       dispatch(matchingStarted(result.conversationId));
@@ -38,10 +38,11 @@ export function requestMatchThunk(params: {
       if (result.matched) {
         dispatch(matchingSucceeded(result.conversationId));
       }
-      // else: leave in 'searching' state — socket will notify on match
+      return result.conversationId;
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: { message?: string } } } };
       dispatch(conversationsError(e.response?.data?.error?.message ?? 'Failed to request match'));
+      return null;
     }
   };
 }

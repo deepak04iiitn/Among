@@ -5,8 +5,10 @@ const BASE = '/api';
 
 export const API = {
   // ─── Auth ───────────────────────────────────────────────────────────────────
-  AUTH_SESSION: `${BASE}/auth/session`,
-  AUTH_REFRESH: `${BASE}/auth/refresh`,
+  AUTH_SESSION:  `${BASE}/auth/session`,
+  AUTH_REFRESH:  `${BASE}/auth/refresh`,
+  AUTH_REGISTER: `${BASE}/auth/register`,
+  AUTH_LOGIN:    `${BASE}/auth/login`,
 
   // ─── Users ──────────────────────────────────────────────────────────────────
   USERS_ME: `${BASE}/users/me`,

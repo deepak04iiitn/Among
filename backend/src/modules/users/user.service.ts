@@ -9,6 +9,7 @@
 import { UserModel, type IUser } from './user.model';
 import { generateAlias, isAliasExpired, canRequestRotation } from '../../utils/aliasGenerator';
 import { generateAvatarData, type AvatarData } from '../../utils/avatarGenerator';
+import { hashPassword, verifyPassword } from '../../services/password.service';
 import {
   ALIAS_ROTATION_CYCLE_MS,
 } from '../../constants/timeouts';
@@ -19,11 +20,17 @@ import {
 import {
   ERR_USER_NOT_FOUND,
   ERR_ALIAS_ROTATION_RATE_LIMITED,
+  ERR_EMAIL_IN_USE,
+  ERR_INVALID_CREDENTIALS,
+  ERR_GOOGLE_SIGN_IN_REQUIRED,
+  ERR_ACCOUNT_BANNED,
 } from '../../constants/errorCodes';
 import {
   ValidationError,
   NotFoundError,
   RateLimitError,
+  ConflictError,
+  AppError,
 } from '../../utils/errors';
 import type { Types } from 'mongoose';
 
@@ -66,7 +73,7 @@ export async function findOrCreateUser(
 
   const user = new UserModel({
     firebaseUid,
-    email,
+    email: email.trim().toLowerCase(),
     enforcementStatus: {
       isBanned:             false,
       bannedAt:             null,
@@ -76,6 +83,65 @@ export async function findOrCreateUser(
     },
   });
   await user.save();
+  return user;
+}
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+/**
+ * Create a native email/password account. Password is hashed before storage.
+ */
+export async function registerWithEmail(email: string, password: string): Promise<IUser> {
+  const normalized = normalizeEmail(email);
+  const existing = await UserModel.findOne({ email: normalized });
+  if (existing) {
+    throw new ConflictError('An account with this email already exists. Sign in instead.', ERR_EMAIL_IN_USE);
+  }
+
+  const passwordHash = await hashPassword(password);
+  const user = new UserModel({
+    email: normalized,
+    passwordHash,
+    enforcementStatus: {
+      isBanned:             false,
+      bannedAt:             null,
+      restrictionType:      null,
+      restrictionExpiresAt: null,
+      warningCount:         0,
+    },
+  });
+  await user.save();
+  return user;
+}
+
+/**
+ * Look up an email/password account and verify the password.
+ * Does not reveal whether the email exists when the password is wrong.
+ */
+export async function loginWithEmail(email: string, password: string): Promise<IUser> {
+  const normalized = normalizeEmail(email);
+  const user = await UserModel.findOne({ email: normalized, deletedAt: null }).select('+passwordHash');
+
+  if (!user) {
+    throw new AppError('Email or password is incorrect.', 401, ERR_INVALID_CREDENTIALS);
+  }
+
+  if (!user.passwordHash) {
+    throw new AppError('This account uses Google sign-in.', 401, ERR_GOOGLE_SIGN_IN_REQUIRED);
+  }
+
+  const matches = await verifyPassword(password, user.passwordHash);
+  if (!matches) {
+    throw new AppError('Email or password is incorrect.', 401, ERR_INVALID_CREDENTIALS);
+  }
+
+  const isBanned = user.enforcementStatus?.isBanned ?? false;
+  if (isBanned) {
+    throw new AppError('This account has been suspended.', 403, ERR_ACCOUNT_BANNED);
+  }
+
   return user;
 }
 

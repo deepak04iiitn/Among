@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ROUTES } from '../../constants/routes';
 import { EXPERIENCE_CATEGORIES } from '../../constants/experienceCategories';
+import Logo from './Logo';
 
 /**
  * Site-wide footer — present on every public page.
@@ -22,13 +23,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-1">
-            <Link
-              href={ROUTES.LANDING}
-              className="font-editorial text-title text-[var(--color-text)] hover:opacity-70 transition-opacity"
-              aria-label="AMONG — home"
-            >
-              Among
-            </Link>
+            <Logo href={ROUTES.LANDING} height={26} />
             <p className="mt-3 text-caption text-[var(--color-text-muted)] leading-relaxed max-w-[160px]">
               A human-experience network built around anonymity and meaningful connection.
             </p>

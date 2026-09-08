@@ -76,6 +76,7 @@ export const fetchYanaStatsThunk = createAsyncThunk<
       const result = await discoveryApi.getYanaStats();
       dispatch(yanaLoaded(result.entries)); return;
     } catch {
+      dispatch(yanaLoaded([]));
       return rejectWithValue('Failed to load stats.');
     }
   }

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import type { JSX } from 'react';
+import ConversationDetailView from '../../../../components/conversations/ConversationDetailView';
 
 interface ConversationPageProps {
   params: Promise<{ id: string }>;
@@ -11,18 +13,7 @@ export async function generateMetadata(_props: ConversationPageProps): Promise<M
   };
 }
 
-/**
- * Conversation thread page — Phase 7.
- * Letter-exchange style UI, no chat bubbles.
- */
-export default async function ConversationPage({ params }: ConversationPageProps) {
+export default async function ConversationPage({ params }: ConversationPageProps): Promise<JSX.Element> {
   const { id } = await params;
-  return (
-    <div className="content-column py-10">
-      <h1 className="sr-only">Conversation</h1>
-      <p className="font-editorial text-title text-[var(--color-text-muted)]">
-        Conversation {id} — coming in Phase 7.
-      </p>
-    </div>
-  );
+  return <ConversationDetailView conversationId={id} />;
 }

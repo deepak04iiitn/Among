@@ -31,8 +31,11 @@ export interface IEnforcementStatus {
 
 export interface IUser extends Document {
   _id:         Types.ObjectId;
-  firebaseUid: string;
+  /** Present for Google accounts. Omitted for native email/password accounts. */
+  firebaseUid?: string;
   email:       string;
+  /** bcrypt hash — never selected by default, never in API responses */
+  passwordHash?: string;
   role:        UserRole;
   subscriptionTier: SubscriptionTier;
 
@@ -97,8 +100,9 @@ const EnforcementStatusSchema = new Schema<IEnforcementStatus>(
 
 const UserSchema = new Schema<IUser>(
   {
-    firebaseUid: { type: String, required: true, unique: true, index: true },
-    email:       { type: String, required: true },
+    firebaseUid:  { type: String, required: false, unique: true, sparse: true, index: true },
+    email:        { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
+    passwordHash: { type: String, required: false, select: false },
 
     role: {
       type:     String,
@@ -148,6 +152,7 @@ const UserSchema = new Schema<IUser>(
         delete ret['__v'];
         delete ret['firebaseUid'];
         delete ret['email'];
+        delete ret['passwordHash'];
         delete ret['enforcementStatus'];
         delete ret['snyOptIns'];
         delete ret['deletedAt'];

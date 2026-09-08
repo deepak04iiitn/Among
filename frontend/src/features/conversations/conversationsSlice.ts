@@ -78,6 +78,7 @@ export const conversationsSlice = createSlice({
     },
     conversationsError(state, action: PayloadAction<string>) {
       state.listStatus = 'error';
+      state.detailStatus = 'error';
       state.error = action.payload;
     },
 
@@ -233,6 +234,8 @@ export const selectConversationsList      = (state: RootState): ConversationList
 export const selectActiveConversationId   = (state: RootState): string | null          => state.conversations.activeConversationId;
 export const selectActiveDetail           = (state: RootState): ConversationDetail | null => state.conversations.activeDetail;
 export const selectConversationsListStatus = (state: RootState): ConversationsStatus   => state.conversations.listStatus;
+export const selectDetailStatus           = (state: RootState): ConversationsStatus    => state.conversations.detailStatus;
+export const selectConversationsError     = (state: RootState): string | null          => state.conversations.error;
 export const selectMessagesStatus         = (state: RootState): ConversationsStatus    => state.conversations.messagesStatus;
 export const selectMatchingState          = (state: RootState)                         => state.conversations.matchingState;
 export const selectMatchingRequestId      = (state: RootState): string | null          => state.conversations.matchingRequestId;

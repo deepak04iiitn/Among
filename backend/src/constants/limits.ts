@@ -21,6 +21,18 @@ export const MESSAGE_MAX_CHARS = 1000;
 export const ONBOARDING_CATEGORY_MIN = 3;
 export const ONBOARDING_CATEGORY_MAX = 5;
 
+/** Email/password auth — AMONG requires 8 */
+export const PASSWORD_MIN_CHARS = 8;
+export const PASSWORD_MAX_CHARS = 128;
+export const EMAIL_MAX_CHARS = 254;
+
+/** bcrypt cost factor for native email/password hashes — backend only */
+export const BCRYPT_ROUNDS = 12;
+
+/** Login/register attempts per IP (or account) in AUTH_ATTEMPT_WINDOW_MS */
+export const AUTH_ATTEMPT_MAX = 10;
+export const AUTH_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+
 // ─── Discovery feed limits ───────────────────────────────────────────────────
 export const SECONDARY_DISCOVERY_ITEMS = 5;
 export const CATEGORY_PAGE_BATCH_SIZE = 20;

@@ -14,6 +14,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ROUTES } from '../constants/routes';
 import { EXPERIENCE_CATEGORIES } from '../constants/experienceCategories';
+import Logo from '../components/layout/Logo';
 
 export const metadata: Metadata = {
   title: 'AMONG — You are not alone in this',
@@ -94,12 +95,7 @@ export default function LandingPage() {
         {/* ── Minimal header ─────────────────────────────────────────────── */}
         <header className="sticky top-0 z-20 border-b border-[var(--color-border)] bg-[var(--color-bg)]">
           <div className="max-w-shell mx-auto px-5 md:px-8 h-14 flex items-center justify-between">
-            <span
-              className="font-editorial text-title text-[var(--color-text)]"
-              aria-label="AMONG"
-            >
-              Among
-            </span>
+            <Logo href={false} height={24} />
             <nav aria-label="Main navigation" className="flex items-center gap-4">
               <Link
                 href={ROUTES.EXPLORE}

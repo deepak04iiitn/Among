@@ -9,7 +9,9 @@
  */
 import type { Request, Response, NextFunction } from 'express';
 import * as postService from './post.service';
+import * as userService from '../users/user.service';
 import { CRISIS_RESOURCES } from '../../constants/crisisResources';
+import { ValidationError } from '../../utils/errors';
 import type { CreatePostInput, EditPostInput } from './post.schema';
 import type { PostExperienceState, PostVisibility } from '../../constants/postStates';
 
@@ -23,12 +25,17 @@ export async function createPost(
   try {
     const { accountId } = req.user!;
 
-    // Alias snapshot comes from the authenticated user's current alias
-    // In a full implementation this would come from user.service.getPrivateProfile()
-    // For Phase 4 we read it from the request body as an optional override, or use a placeholder
-    // (The alias is properly set when the user has completed onboarding — see Phase 3)
-    const authorAlias     = (req.body as unknown as { authorAlias?: string }).authorAlias ?? req.user?.firebaseUid ?? 'Anonymous';
-    const authorAvatarSeed = (req.body as unknown as { authorAvatarSeed?: string }).authorAvatarSeed ?? '';
+    // Always read alias snapshot from the user's current alias in the DB.
+    // The frontend never sends alias data — it is server-authoritative.
+    let authorAlias: string;
+    let authorAvatarSeed: string;
+    try {
+      const profile    = await userService.getPublicProfile(accountId);
+      authorAlias      = profile.aliasName;
+      authorAvatarSeed = profile.avatarSeed;
+    } catch {
+      throw new ValidationError('You must complete onboarding before sharing an experience.');
+    }
 
     const result = await postService.createPost(
       accountId,

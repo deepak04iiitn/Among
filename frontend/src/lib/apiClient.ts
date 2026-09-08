@@ -17,6 +17,7 @@ import axios, {
   isAxiosError,
 } from 'axios';
 import { API_TIMEOUT_MS } from '../constants/limits';
+import { API } from '../constants/apiEndpoints';
 
 // ─── Token accessor ───────────────────────────────────────────────────────────
 // Using a getter/setter so the apiClient never imports from the Redux store
@@ -76,9 +77,9 @@ let _refreshInProgress: Promise<void> | null = null;
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
-    // Skip auth header for the session and refresh endpoints themselves
+    // Skip auth header for public auth endpoints
     const url = config.url ?? '';
-    if (url.includes('/auth/session') || url.includes('/auth/refresh')) {
+    if (isPublicAuthUrl(url)) {
       return config;
     }
 
@@ -114,9 +115,11 @@ apiClient.interceptors.response.use(
     if (isAxiosError(error)) {
       const status = error.response?.status ?? 0;
 
-      // On 401: attempt a single silent refresh, then retry the original request
+      // On 401: attempt a single silent refresh, then retry the original request.
+      // Wrong email/password is also 401 — never treat public auth as a stale token.
+      const failedUrl = error.config?.url ?? '';
       const configExt = error.config as unknown as Record<string, unknown>;
-      if (status === 401 && !configExt['_retry']) {
+      if (status === 401 && !configExt['_retry'] && !isPublicAuthUrl(failedUrl)) {
         try {
           if (!_refreshInProgress) {
             _refreshInProgress = _refreshTokens().finally(() => { _refreshInProgress = null; });
@@ -134,8 +137,14 @@ apiClient.interceptors.response.use(
         }
       }
 
-      const data    = error.response?.data as { error?: ApiErrorBody } | undefined;
-      const errBody = data?.error;
+      const data = error.response?.data as
+        | { error?: ApiErrorBody; code?: string; message?: string }
+        | undefined;
+      const errBody =
+        data?.error ??
+        (data?.code && data?.message
+          ? { code: data.code, message: data.message }
+          : undefined);
 
       if (errBody?.code && errBody?.message) {
         return Promise.reject(new ApiError(status, errBody.code, errBody.message));
@@ -158,5 +167,14 @@ apiClient.interceptors.response.use(
     );
   }
 );
+
+function isPublicAuthUrl(url: string): boolean {
+  return (
+    url.includes(API.AUTH_SESSION) ||
+    url.includes(API.AUTH_REFRESH) ||
+    url.includes(API.AUTH_REGISTER) ||
+    url.includes(API.AUTH_LOGIN)
+  );
+}
 
 export default apiClient;
