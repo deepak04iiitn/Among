@@ -137,62 +137,64 @@
 }
 
 /* ─── Keyframes ─────────────────────────────────────────────────────────────── */
-/* ALL keyframes live here — never inline keyframes in component files.          */
+/* Defined globally so the names always resolve. Application is gated below.     */
 
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
-  @keyframes slideUp {
-    from { transform: translateY(12px); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-  }
+@keyframes slideUp {
+  from { transform: translateY(1.25rem); opacity: 0; }
+  to   { transform: translateY(0);       opacity: 1; }
+}
 
-  /* Hero word stagger — each word fades in from below */
-  @keyframes wordReveal {
-    0%   { transform: translateY(100%); opacity: 0; }
-    100% { transform: translateY(0);    opacity: 1; }
-  }
+@keyframes wordReveal {
+  0%   { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
 
-  /* Alias reveal — avatar path drawing */
-  @keyframes avatarDraw {
-    from { stroke-dashoffset: 1000; }
-    to   { stroke-dashoffset: 0; }
-  }
+@keyframes avatarDraw {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
 
-  /* Count update — outgoing number exits up, incoming enters from below */
-  @keyframes countOut {
-    from { transform: translateY(0);    opacity: 1; }
-    to   { transform: translateY(-4px); opacity: 0; }
-  }
-  @keyframes countIn {
-    from { transform: translateY(4px);  opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-  }
+@keyframes countOut {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(-4px); opacity: 0; }
+}
+@keyframes countIn {
+  from { transform: translateY(4px);  opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
 
-  /* Overlay fade for alias reveal backdrop */
-  @keyframes overlayIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes overlayOut {
-    from { opacity: 1; }
-    to   { opacity: 0; }
-  }
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes overlayOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
 
-  /* Skeleton pulse */
-  @keyframes skeletonPulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.45; }
-  }
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
 
-  /* Route transition */
-  @keyframes pageEnter {
-    from { transform: translateY(8px); opacity: 0; }
-    to   { transform: translateY(0);   opacity: 1; }
-  }
+@keyframes ruleDraw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes gutterDraw {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes pageEnter {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
 }
 
 /* ─── AMONG utility classes ──────────────────────────────────────────────────── */
@@ -291,12 +293,98 @@
   }
   .word-reveal > span {
     @apply inline-block;
-    animation: wordReveal var(--duration-reveal) var(--ease-out) both;
+  }
+  .word-reveal:nth-child(1) > span { animation-delay: 0ms; }
+  .word-reveal:nth-child(2) > span { animation-delay: var(--duration-fast); }
+  .word-reveal:nth-child(3) > span { animation-delay: calc(var(--duration-fast) * 2); }
+  .word-reveal:nth-child(4) > span { animation-delay: calc(var(--duration-fast) * 3); }
+  .word-reveal:nth-child(5) > span { animation-delay: calc(var(--duration-fast) * 4); }
+  .word-reveal:nth-child(6) > span { animation-delay: calc(var(--duration-fast) * 5); }
+  .word-reveal:nth-child(7) > span { animation-delay: calc(var(--duration-fast) * 6); }
+  .word-reveal:nth-child(8) > span { animation-delay: calc(var(--duration-fast) * 7); }
+
+  .landing-rule {
+    display: block;
+    height: 1px;
+    width: 100%;
+    background-color: var(--color-border);
+    transform-origin: left center;
   }
 
-  /* ── Page enter animation ── */
-  .page-enter {
-    animation: pageEnter var(--duration-slow) var(--ease-out) both;
+  .landing-drop::first-letter {
+    @apply font-editorial text-headline text-text;
+    float: left;
+    line-height: 0.82;
+    padding-right: 0.55rem;
+    padding-top: 0.2rem;
+  }
+
+  .landing-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .landing-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: auto;
+    bottom: 0.55rem;
+    height: 1px;
+    width: 100%;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  .landing-link:hover::after,
+  .landing-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .landing-toc-row {
+    position: relative;
+  }
+  .landing-toc-row::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1px;
+    width: 100%;
+    background-color: var(--color-border);
+    transform: scaleX(1);
+    transform-origin: left center;
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  .landing-toc-row:hover::after,
+  .landing-toc-row:focus-visible::after {
+    background-color: var(--color-accent);
+  }
+
+  .landing-faq summary,
+  .landing-faq summary * {
+    list-style: none;
+    cursor: pointer;
+  }
+  .landing-faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .landing-faq .landing-faq-mark {
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+  .landing-faq details[open] .landing-faq-mark {
+    transform: rotate(45deg);
+  }
+
+  .how-verso-mark {
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    margin-top: 1.5rem;
+    background-color: var(--color-accent);
+    transform-origin: left center;
   }
 
   /* ── Text balance for headlines ── */
@@ -317,5 +405,60 @@
     @apply border border-[var(--color-ok)]
            text-[var(--color-text)] rounded-[var(--radius-md)] p-4;
     background-color: var(--color-ok-subtle);
+  }
+}
+
+/*
+ * Motion applications — UNLAYERED on purpose.
+ * Nested @media inside @layer utilities is dropped by Tailwind's PostCSS,
+ * which is why section arrivals were not animating.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .word-reveal > span {
+    animation: wordReveal var(--duration-reveal) var(--ease-out) both;
+  }
+
+  .landing-hero-kicker {
+    animation: fadeIn var(--duration-slow) var(--ease-out) both;
+  }
+  .landing-hero-lede {
+    animation: fadeIn var(--duration-slow) var(--ease-out) both;
+    animation-delay: calc(var(--duration-slow) * 2);
+  }
+  .landing-hero-actions {
+    animation: fadeIn var(--duration-slow) var(--ease-out) both;
+    animation-delay: calc(var(--duration-slow) + var(--duration-reveal));
+  }
+
+  .landing-reveal {
+    animation: slideUp var(--duration-slow) var(--ease-out) both;
+  }
+
+  .page-enter {
+    animation: pageEnter var(--duration-slow) var(--ease-out) both;
+  }
+
+  .landing-inview[data-armed="true"][data-in="false"] {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  .landing-inview[data-armed="true"][data-in="true"] {
+    animation: slideUp var(--duration-reveal) var(--ease-out) both;
+  }
+  .how-delay-2[data-in="true"] {
+    animation-delay: var(--duration-fast);
+  }
+  .how-delay-3[data-in="true"] {
+    animation-delay: calc(var(--duration-fast) * 2);
+  }
+
+  .landing-inview[data-in="true"] .landing-rule {
+    animation: ruleDraw var(--duration-slow) var(--ease-out) both;
+  }
+  .landing-inview[data-in="true"] .how-verso-mark {
+    animation: ruleDraw var(--duration-slow) var(--ease-out) both;
+  }
+  .landing-inview[data-in="true"] .how-gutter {
+    animation: gutterDraw var(--duration-slow) var(--ease-out) both;
   }
 }

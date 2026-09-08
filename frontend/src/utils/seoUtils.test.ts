@@ -13,6 +13,7 @@ import {
   buildBreadcrumbJsonLd,
   buildOrganizationJsonLd,
   buildWebSiteJsonLd,
+  buildFaqPageJsonLd,
 } from './seoUtils';
 
 describe('buildPageMeta', () => {
@@ -142,5 +143,25 @@ describe('buildWebSiteJsonLd', () => {
     expect(result['@type']).toBe('WebSite');
     expect(result.name).toBe('AMONG');
     expect(result.url).toContain('among.io');
+  });
+});
+
+describe('buildFaqPageJsonLd', () => {
+  it('maps questions into a FAQPage entity list', () => {
+    const result = buildFaqPageJsonLd([
+      { question: 'What is AMONG?', answer: 'An anonymous experience network.' },
+    ]) as {
+      '@type': string;
+      mainEntity: Array<{
+        '@type': string;
+        name: string;
+        acceptedAnswer: { '@type': string; text: string };
+      }>;
+    };
+    expect(result['@type']).toBe('FAQPage');
+    expect(result.mainEntity).toHaveLength(1);
+    expect(result.mainEntity[0]?.['@type']).toBe('Question');
+    expect(result.mainEntity[0]?.name).toBe('What is AMONG?');
+    expect(result.mainEntity[0]?.acceptedAnswer.text).toBe('An anonymous experience network.');
   });
 });

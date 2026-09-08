@@ -64,6 +64,29 @@ export const ANIMATION = {
   WORD_STAGGER: 'animate-wordStagger',
   AVATAR_DRAW: 'animate-avatarDraw',
   PULSE: 'animate-pulse',
+  LANDING_REVEAL: 'landing-reveal',
+  LANDING_INVIEW: 'landing-inview',
+  LANDING_RULE: 'landing-rule',
+  LANDING_DROP: 'landing-drop',
+  LANDING_LINK: 'landing-link',
+  LANDING_TOC: 'landing-toc-row',
+  LANDING_FAQ: 'landing-faq',
+  HOW_FOLIO: 'how-folio',
+  HOW_VERSO: 'how-verso',
+  HOW_RECTO: 'how-recto',
+  HOW_GUTTER: 'how-gutter',
+  HOW_VERSO_MARK: 'how-verso-mark',
+  HOW_DELAY_2: 'how-delay-2',
+  HOW_DELAY_3: 'how-delay-3',
+  HERO_KICKER: 'landing-hero-kicker',
+  HERO_LEDE: 'landing-hero-lede',
+  HERO_ACTIONS: 'landing-hero-actions',
+} as const;
+
+/** Scroll-entrance observer — keep sections animating in the visible frame. */
+export const IN_VIEW = {
+  THRESHOLD: 0.2,
+  ROOT_MARGIN: '0px 0px -20% 0px',
 } as const;
 
 /** Max width tokens */

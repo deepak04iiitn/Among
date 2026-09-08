@@ -13,9 +13,17 @@ export const SITE_URL  = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://among.i
 /** Per-page meta templates */
 export const PAGE_META = {
   LANDING: {
-    title:       'AMONG — You are not alone in this',
-    description: 'A private, anonymous space to share your lived experiences and connect with people who have been there too. No names. No followers. Just truth.',
-    keywords:    ['anonymous community', 'shared experiences', 'mental health support', 'you are not alone'],
+    title:       "Anonymous lived experiences — you're not alone | AMONG",
+    description:
+      'A private anonymous community to share lived experiences and find people who have been through loneliness, work, family, and more. No names. No followers.',
+    keywords: [
+      'anonymous community',
+      'shared lived experiences',
+      'you are not alone',
+      'anonymous support',
+      'loneliness',
+      'emotional support',
+    ],
   },
 
   EXPLORE: {

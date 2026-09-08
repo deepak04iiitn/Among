@@ -93,3 +93,24 @@ export function buildWebSiteJsonLd(): object {
     description: 'A private, anonymous network built around shared human experiences.',
   };
 }
+
+export interface FaqItem {
+  readonly question: string;
+  readonly answer: string;
+}
+
+/** JSON-LD FAQPage for help and the public landing (FR-SEO-7) */
+export function buildFaqPageJsonLd(faqs: readonly FaqItem[]): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type':    'FAQPage',
+    mainEntity: faqs.map((item) => ({
+      '@type':          'Question',
+      name:             item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text:    item.answer,
+      },
+    })),
+  };
+}
