@@ -84,6 +84,7 @@ const config: Config = {
       fontFamily: {
         editorial: ['var(--font-editorial)', 'Fraunces', 'Georgia', 'serif'],
         ui:        ['var(--font-ui)',        'Karla', 'system-ui', 'sans-serif'],
+        brand:     ['var(--font-brand)',     'Comfortaa', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         // Fixed editorial scale — see CLAUDE.md §7.4 for token rationale
@@ -112,9 +113,10 @@ const config: Config = {
 
       // ─── Max widths ──────────────────────────────────────────────────────
       maxWidth: {
-        reading: '65ch',   // max line-length for post body text (~65 chars)
-        content: '672px',  // max-w-2xl equivalent for editorial column
-        shell:   '896px',  // max-w-4xl for wider UI surfaces (explore)
+        reading: '65ch',    // max line-length for post body text (~65 chars)
+        content: '672px',   // max-w-2xl equivalent for editorial column
+        shell:   '896px',   // max-w-4xl for wider UI surfaces (explore)
+        spread:  '72rem',   // journal back-cover / wide editorial chrome (footer)
       },
 
       // ─── Custom keyframe animations ──────────────────────────────────────

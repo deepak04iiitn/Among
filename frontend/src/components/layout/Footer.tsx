@@ -1,144 +1,101 @@
 import Link from 'next/link';
+import type { JSX, ReactNode } from 'react';
 import { ROUTES } from '../../constants/routes';
 import { EXPERIENCE_CATEGORIES } from '../../constants/experienceCategories';
+import {
+  FOOTER_COLOPHON_LINKS,
+  FOOTER_COPY,
+  footerCopyright,
+} from '../../constants/footer';
 import Logo from './Logo';
+import { BRAND_LOGO } from '../../constants/brand';
 
 /**
- * Site-wide footer — present on every public page.
- * Required for SEO (FR-SEO-15): provides global internal linking structure.
- * Typography-only — no icons, no color, no heavy chrome.
+ * Site-wide footer — "Letter / Typesetter" pattern.
+ * Full spec: /docs/theme.md §7 "Footer — Letter / Typesetter (locked pattern)".
+ *
+ * A letter closing (statement + logo lockup) with a P.S.
+ * field of experience names — wrapping, not a single comma line.
+ *
+ * Present on every public page — the sole source of the global footer
+ * (FR-SEO-15/16/17 internal linking). No page should hand-roll its own.
  */
-export default function Footer() {
+
+export default function Footer(): JSX.Element {
   const year = new Date().getFullYear();
 
-  // Take the first 8 categories for the footer links
-  const footerCategories = EXPERIENCE_CATEGORIES.slice(0, 8);
-
   return (
-    <footer
-      aria-label="Site footer"
-      className="mt-20 border-t border-[var(--color-border)]"
-    >
-      <div className="content-column py-12">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-          {/* Brand column */}
-          <div className="col-span-2 sm:col-span-1">
-            <Logo href={ROUTES.LANDING} height={26} />
-            <p className="mt-3 text-caption text-[var(--color-text-muted)] leading-relaxed max-w-[160px]">
-              A human-experience network built around anonymity and meaningful connection.
-            </p>
-          </div>
+    <footer aria-label={FOOTER_COPY.ARIA_LABEL} className="mt-24 border-t border-border">
+      <div className="spread-column py-14 md:py-16">
+        {/* ─── Letter ─── */}
+        <p className="font-editorial italic text-title text-text text-pretty max-w-reading">
+          {FOOTER_COPY.STATEMENT}
+        </p>
+        <Logo href={ROUTES.LANDING} height={BRAND_LOGO.FOOTER_HEIGHT_PX} className="mt-8" />
 
-          {/* Experiences column */}
-          <div>
-            <h3 className="text-ui font-medium text-[var(--color-text)] mb-3">
-              Experiences
-            </h3>
-            <nav aria-label="Experience categories footer navigation">
-              <ul className="space-y-2">
-                {footerCategories.map((cat) => (
-                  <li key={cat.id}>
-                    <Link
-                      href={ROUTES.EXPLORE_CATEGORY(cat.slug)}
-                      className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                    >
-                      {cat.displayName}
-                    </Link>
-                  </li>
-                ))}
-                <li>
-                  <Link
-                    href={ROUTES.EXPLORE}
-                    className="text-caption text-[var(--color-accent)] hover:opacity-80 transition-opacity"
-                  >
-                    All experiences →
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
-
-          {/* Platform column */}
-          <div>
-            <h3 className="text-ui font-medium text-[var(--color-text)] mb-3">
-              Platform
-            </h3>
-            <nav aria-label="Platform links footer navigation">
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href={ROUTES.ABOUT}
-                    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={ROUTES.GUIDELINES}
-                    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  >
-                    Community guidelines
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={ROUTES.HELP}
-                    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  >
-                    Help
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={ROUTES.SITEMAP}
-                    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  >
-                    Sitemap
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
-
-          {/* Legal column */}
-          <div>
-            <h3 className="text-ui font-medium text-[var(--color-text)] mb-3">
-              Legal
-            </h3>
-            <nav aria-label="Legal links footer navigation">
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/privacy"
-                    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  >
-                    Privacy policy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/terms"
-                    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-                  >
-                    Terms of service
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <p className="text-caption text-[var(--color-text-muted)]">
-            © {year} AMONG. All rights reserved.
+        {/* ─── P.S. — wrapping name field ─── */}
+        <nav aria-labelledby="footer-ps-heading" className="mt-12">
+          <p
+            id="footer-ps-heading"
+            className="flex items-center gap-2.5 text-caption italic text-text-muted"
+          >
+            {FOOTER_COPY.PS_HEADING}
+            <span
+              aria-hidden="true"
+              className="inline-block h-1.5 w-1.5 rounded-full bg-accent"
+            />
           </p>
-          <p className="text-caption text-[var(--color-text-muted)]">
-            Built for humans. For privacy.
-          </p>
+          <ul className="mt-4 flex flex-wrap gap-x-8 gap-y-1 border-l-2 border-border pl-5">
+            {EXPERIENCE_CATEGORIES.map((cat) => (
+              <li key={cat.id}>
+                <FooterLink href={ROUTES.EXPLORE_CATEGORY(cat.slug)}>
+                  {cat.displayName}
+                </FooterLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* ─── Stamp ─── */}
+        <div className="mt-10 flex flex-wrap items-center justify-end gap-x-5 gap-y-2 border-t border-border pt-4">
+          <nav aria-label={FOOTER_COPY.COLOPHON_NAV}>
+            <ul className="flex flex-wrap justify-end gap-x-4 gap-y-1">
+              {FOOTER_COLOPHON_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <FooterLink href={href} compact>
+                    {label}
+                  </FooterLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <p className="text-caption text-text-muted">{footerCopyright(year)}</p>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterLink({
+  href,
+  children,
+  compact = false,
+}: {
+  href: string;
+  children: ReactNode;
+  compact?: boolean;
+}): JSX.Element {
+  return (
+    <Link
+      href={href}
+      className={[
+        'inline-flex items-center text-text-secondary hover:text-text',
+        'transition-colors duration-fast rounded-sm',
+        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        compact ? 'min-h-11 text-caption' : 'min-h-11 font-editorial italic text-body',
+      ].join(' ')}
+    >
+      {children}
+    </Link>
   );
 }

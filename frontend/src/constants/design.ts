@@ -5,6 +5,7 @@
 export const FONT = {
   EDITORIAL: 'font-editorial',
   UI: 'font-ui',
+  BRAND: 'font-brand',
 } as const;
 
 /** Type scale class names */
@@ -69,5 +70,6 @@ export const ANIMATION = {
 export const MAX_WIDTH = {
   READING: 'max-w-reading',   // ~65ch — for post body text
   CONTENT: 'max-w-2xl',       // 672px — for all primary content columns
-  UI: 'max-w-4xl',            // 896px — for wider UI surfaces (explore grid)
+  UI:      'max-w-4xl',       // 896px — for wider UI surfaces (explore grid)
+  SPREAD:  'max-w-spread',    // 72rem — journal back-cover / wide editorial chrome
 } as const;

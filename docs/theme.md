@@ -64,8 +64,9 @@ Flat color only. No gradients on buttons, headers, avatars, backgrounds, or load
 |---|---|---|---|
 | Editorial (display/content) | **Fraunces** (italic for expressive moments) | `next/font/google` → `--font-editorial` | `Fraunces, Georgia, serif` |
 | UI (chrome/body) | **Karla** | `next/font/google` → `--font-ui` | `Karla, system-ui, sans-serif` |
+| Brand lockup | **Comfortaa** (medium, lowercase) | `next/font/google` → `--font-brand` | `Comfortaa, system-ui, sans-serif` |
 
-Fraunces is used **only** where content deserves typographic weight: the landing hero, the primary daily experience card, the alias reveal, "You Are Not Alone" statements, category page H1s. Karla handles everything else — navigation, buttons, forms, secondary body copy, timestamps. Never mix the two within a single line of text.
+Fraunces is used **only** where content deserves typographic weight: the landing hero, the primary daily experience card, the alias reveal, "You Are Not Alone" statements, category page H1s. Karla handles everything else — navigation, buttons, forms, secondary body copy, timestamps. Comfortaa is **only** for the `among` word next to the logo mark (`Logo.tsx`). Never mix the two within a single line of text.
 
 ### Type scale (`tailwind.config.ts` → `fontSize`)
 
@@ -89,7 +90,8 @@ Reading width constraint: post body text never exceeds **65 characters per line*
 8px-base spacing scale (`tailwind.config.ts` → `spacing`), unchanged from the structural rules in the Implementation Plan §7B.4:
 
 - Reading content: `max-w-2xl` (672px)
-- Wider UI shells (Explore grid, admin tables): `max-w-4xl` (896px)
+- Wider UI shells (Explore grid, admin tables): `max-w-shell` / `max-w-4xl` (896px)
+- Journal back-cover / wide editorial chrome (footer): `max-w-spread` (72rem) via `.spread-column`
 - Outer padding: `px-5` mobile / `px-8` tablet+
 - Vertical rhythm: multiples of 8 only (`space-y-8`, `space-y-12`, `space-y-16`)
 - No card grids for primary content — single column, editorial layout
@@ -139,10 +141,22 @@ The primary nav is a detached, floating pill — not an edge-to-edge bar. This i
 
 - **Shape**: `rounded-full` capsule, inset from the viewport edge, `sticky top-4` (desktop) / `fixed bottom-4` (mobile), centered, `max-w-[720px]`.
 - **Surface**: `--color-surface-glass` + `backdrop-blur` at rest, swapping to `--color-surface-glass-strong` and slightly tighter padding once the page has scrolled (`isScrolled` state, threshold ~12px). This is the **only** place `box-shadow` is used outside form controls — kept tight (`0 6px 20px -6px`), not a wide halo, so the pill's own edge (border in `--color-border-strong`, not the default `--color-border`) defines the shape rather than the shadow's blur.
-- **Brand mark**: the capsule shows a plain text wordmark ("Among", `font-editorial italic`) — never the `/Among_Logo.png` asset, which is a stacked icon-over-wordmark image sized for a much taller placement and both illegible and gradient-colored at nav scale.
+- **Layout**: three columns — brand lockup left, primary links (`Home`, `Explore`, `Conversations`, `You`) truly centered in the capsule, actions (notifications / Share / Log out) right. Grid: `grid-cols-[1fr_auto_1fr]`.
+- **Brand mark**: the capsule shows `Logo` — `/Among_Logo.png` with lowercase Comfortaa `among` to its right (`BRAND_LOGO.NAV_HEIGHT_PX`). Never inline the image path or the wordmark string.
 - **Active/hover indicator**: a single pill (`bg-accent-subtle border border-accent`) that physically slides and resizes (via measured `left`/`width`, `transition: 300ms cubic-bezier(.4,0,.2,1)`) to whichever link is hovered, and eases back to the active route on mouse-leave. This is the one recurring "ember" element in the nav — everything else in the capsule (logo, links, Compose outline pill) stays neutral to hold the 20% accent ceiling.
 - **Compose**: `.btn-secondary` (outline pill, inverts to solid on hover) — the only other emphasized element, but still not accent-colored.
 - **Mobile**: same floating capsule shape, moved to `fixed bottom-4`, collapsed to icon-only buttons plus a filled ember circle for Compose (the one place a solid accent fill is used, since it's the single most important action in that cramped layout).
+
+### Footer — "Letter / Typesetter" (locked pattern)
+
+The footer is the end of a letter, set like a printer's strip — not a sitemap, and not a journal back-cover spread. It uses `.spread-column` (`max-w-spread`) so the P.S. field can breathe.
+
+- **Structure**: generous air above a hairline (`border-t`). Then a short Fraunces italic letter (`text-title`) and the AMONG lockup as the signature (`Logo` at `BRAND_LOGO.FOOTER_HEIGHT_PX` — mark, then Comfortaa `among` to its right). Then a **P.S.** field: the label and ember dot on their own row; every experience category as a wrapping constellation of italic names (`font-editorial italic text-body`, generous `gap-x-8`, no commas, no chips), indented with `border-l-2 border-border` like a postscript in the margin. A second hairline. A tiny right-aligned stamp: platform + legal links + copyright, all `text-caption`.
+- **Accent**: one 6px ember dot after `P.S.` — the lamp. Links stay secondary text; hover shifts to primary text, not accent (holds the 20% ceiling).
+- **No card, no numbered contents, no comma ticker, no colorful chips, no icon set.**
+- **Brand mark**: `Logo` (`frontend/src/components/layout/Logo.tsx`) — the same shared component the nav uses. Never duplicate the `<Image>` inline; import it.
+- **Copy and labels**: `frontend/src/constants/footer.ts`. No inline user-facing strings in the component.
+- **One shared component, everywhere.** `Footer.tsx` is the only footer in the product. No page — including the landing page — renders its own inline `<footer>`. If a page needs different visibility, use `AppShell`'s `showFooter` prop, never a hand-rolled substitute.
 
 ---
 
@@ -156,6 +170,6 @@ If a light mode is ever introduced, do not invent a new palette from scratch. Re
 
 - `frontend/src/app/globals.css` — all CSS custom properties (`:root`), base resets, keyframes, and shared utility classes (`.btn-primary`, `.same-pill` equivalents, `.crisis-banner`, etc.).
 - `frontend/tailwind.config.ts` — Tailwind theme extension mapping token names to the CSS variables above. Never add a raw hex value here.
-- `frontend/src/app/layout.tsx` — `next/font/google` loading of Fraunces (`--font-editorial`) and Karla (`--font-ui`).
+- `frontend/src/app/layout.tsx` — `next/font/google` loading of Fraunces (`--font-editorial`), Karla (`--font-ui`), and Comfortaa (`--font-brand`).
 
 Any new component must be built entirely from these token classes. If a design need isn't covered by an existing token, extend this document and the CSS variables together, in the same commit — never invent a one-off value inline.

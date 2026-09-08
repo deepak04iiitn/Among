@@ -1,52 +1,76 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { JSX } from 'react';
 import { ROUTES } from '../../constants/routes';
+import { BRAND_LOGO, brandLogoWidth } from '../../constants/brand';
+import { COLOR, FONT, TEXT_SIZE } from '../../constants/design';
+import { cn } from '../../lib/utils';
 
-interface LogoProps {
-  /** Pixel height of the logo image (width scales proportionally). Default: 28 */
+export interface LogoProps {
+  /** Pixel height of the logo image (width scales proportionally). */
   height?: number;
   /** Wraps the logo in a Link — pass false to render as a plain <span> */
   href?: string | false;
   /** Extra Tailwind classes on the wrapping element */
   className?: string;
+  /** Eager-load for above-the-fold placements (nav). Default: false */
+  priority?: boolean;
 }
 
 /**
- * AMONG brand logo — uses the actual logo image from /public.
- * Renders as a Next.js <Image> with correct intrinsic dimensions.
- * Wraps in a <Link> by default; pass href={false} to suppress the link.
+ * AMONG brand lockup — `/Among_Logo.png` with lowercase Comfortaa wordmark to its right.
+ * Used in the header capsule and as the footer signature.
  */
-export default function Logo({ height = 28, href = ROUTES.LANDING, className = '' }: LogoProps) {
-  // The source image is 612×408 px (~3:2 ratio, icon-over-wordmark lockup). Compute width from height.
-  const aspectRatio = 612 / 408;
-  const width = Math.round(height * aspectRatio);
+export default function Logo({
+  height = BRAND_LOGO.NAV_HEIGHT_PX,
+  href = ROUTES.LANDING,
+  className = '',
+  priority = false,
+}: LogoProps): JSX.Element {
+  const width = brandLogoWidth(height);
+  const isFooterScale = height >= BRAND_LOGO.FOOTER_HEIGHT_PX;
 
-  const img = (
-    <Image
-      src="/Among_Logo.png"
-      alt="AMONG"
-      width={width}
-      height={height}
-      priority
-      className="object-contain select-none"
-    />
+  const lockup = (
+    <>
+      <Image
+        src={BRAND_LOGO.SRC}
+        alt=""
+        width={width}
+        height={height}
+        priority={priority}
+        aria-hidden="true"
+        className="object-contain select-none"
+      />
+      <span
+        className={cn(
+          FONT.BRAND,
+          COLOR.TEXT,
+          'lowercase font-medium leading-none tracking-tight',
+          isFooterScale ? TEXT_SIZE.HEADLINE : TEXT_SIZE.TITLE,
+        )}
+      >
+        {BRAND_LOGO.WORDMARK}
+      </span>
+    </>
   );
 
+  const lockupClass = cn('inline-flex items-center gap-2.5', className);
+
   if (href === false) {
-    return (
-      <span className={`inline-flex items-center ${className}`} aria-label="AMONG">
-        {img}
-      </span>
-    );
+    return <span className={lockupClass}>{lockup}</span>;
   }
 
   return (
     <Link
       href={href}
-      className={`inline-flex items-center hover:opacity-75 transition-opacity duration-[var(--duration-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] rounded-sm ${className}`}
-      aria-label="AMONG — go to home"
+      className={cn(
+        lockupClass,
+        'hover:opacity-80 transition-opacity duration-[var(--duration-fast)]',
+        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded-sm',
+      )}
+      aria-label={BRAND_LOGO.LINK_ARIA}
     >
-      {img}
+      {lockup}
     </Link>
   );
 }

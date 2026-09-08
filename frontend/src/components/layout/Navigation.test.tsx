@@ -52,6 +52,7 @@ jest.mock('react-redux', () => ({
 import { usePathname }   from 'next/navigation';
 import { useSelector }   from 'react-redux';
 import Navigation        from './Navigation';
+import { BRAND_LOGO }    from '../../constants/brand';
 
 // Import selectors ONLY for unit-testing their logic
 import { selectIsAuthenticated }  from '../../features/auth/authSlice';
@@ -91,11 +92,11 @@ describe('Navigation (unauthenticated)', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument();
   });
 
-  it('renders the brand wordmark', () => {
+  it('renders the brand lockup', () => {
     asGuest();
     render(<Navigation />);
-    // Text wordmark, not an image — see docs/theme.md §7 "Floating Capsule".
-    expect(screen.getByText('Among', { exact: true })).toBeInTheDocument();
+    expect(screen.getByText(BRAND_LOGO.WORDMARK)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: BRAND_LOGO.LINK_ARIA })).toBeInTheDocument();
   });
 
   it('renders the "Enter Among" CTA for guests', () => {

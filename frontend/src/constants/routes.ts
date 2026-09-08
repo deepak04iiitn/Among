@@ -11,6 +11,8 @@ export const ROUTES = {
   GUIDELINES: '/guidelines',
   HELP: '/help',
   SITEMAP: '/sitemap',
+  PRIVACY: '/privacy',
+  TERMS: '/terms',
 
   // ─── Onboarding ────────────────────────────────────────────────────────────
   ONBOARDING_INTENT: '/onboarding/intent',
@@ -51,6 +53,8 @@ export const PUBLIC_SITEMAP_ROUTES: readonly string[] = [
   ROUTES.GUIDELINES,
   ROUTES.HELP,
   ROUTES.SITEMAP,
+  ROUTES.PRIVACY,
+  ROUTES.TERMS,
 ];
 
 /** Routes disallowed in robots.txt (never crawlable) */

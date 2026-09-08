@@ -9,6 +9,8 @@ import { selectIsAuthenticated } from '../../features/auth/authSlice';
 import { selectUnreadCount } from '../../features/notifications/notificationsSlice';
 import { signOutThunk } from '../../features/auth/authThunks';
 import { ROUTES } from '../../constants/routes';
+import Logo from './Logo';
+import { BRAND_LOGO } from '../../constants/brand';
 
 /**
  * Primary navigation — "Floating Capsule" pattern.
@@ -42,18 +44,6 @@ interface IndicatorRect {
   width: number;
 }
 
-/** Text wordmark — matches the "Afterhours" pitch exactly: italic Fraunces, no image. */
-function BrandWordmark({ href }: { href: string }): React.JSX.Element {
-  return (
-    <Link
-      href={href}
-      aria-label="AMONG — go to home"
-      className="font-editorial italic text-[1.375rem] leading-none text-[var(--color-text)] whitespace-nowrap hover:opacity-80 transition-opacity duration-[var(--duration-fast)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] rounded-sm"
-    >
-      Among
-    </Link>
-  );
-}
 
 export default function Navigation() {
   const pathname        = usePathname();
@@ -135,7 +125,7 @@ function AppCapsuleNav({
     >
       <div
         className={[
-          'flex items-center gap-5 rounded-pill border border-[var(--color-border-strong)]',
+          'grid grid-cols-[1fr_auto_1fr] items-center rounded-pill border border-[var(--color-border-strong)]',
           'backdrop-blur-[14px] backdrop-saturate-150',
           'shadow-[0_6px_20px_-6px_rgba(0,0,0,0.5)]',
           'transition-[padding,background-color] duration-300 w-full max-w-[1600px]',
@@ -144,13 +134,13 @@ function AppCapsuleNav({
             : 'pl-6 pr-3 py-2.5 bg-[var(--color-surface-glass)]',
         ].join(' ')}
       >
-        <BrandWordmark href={ROUTES.HOME} />
+        <Logo href={ROUTES.HOME} height={BRAND_LOGO.NAV_HEIGHT_PX} priority className="justify-self-start" />
 
         <nav
           aria-label="Primary navigation"
           ref={containerRef}
           onMouseLeave={() => setHoveredHref(null)}
-          className="relative flex items-center gap-0.5 flex-1"
+          className="relative flex items-center gap-0.5 justify-self-center"
         >
           <span
             aria-hidden="true"
@@ -179,7 +169,7 @@ function AppCapsuleNav({
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-self-end">
           <button
             type="button"
             aria-label={unreadCount > 0 ? `Notifications — ${unreadCount} unread` : 'Notifications'}
@@ -272,7 +262,7 @@ function PublicCapsuleNav(): React.JSX.Element {
           'shadow-[0_6px_20px_-6px_rgba(0,0,0,0.5)] w-full max-w-[1600px] mx-auto',
         ].join(' ')}
       >
-        <BrandWordmark href={ROUTES.LANDING} />
+        <Logo href={ROUTES.LANDING} height={BRAND_LOGO.NAV_HEIGHT_PX} priority />
 
         <div className="flex items-center gap-6">
           <Link

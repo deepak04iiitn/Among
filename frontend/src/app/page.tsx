@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { ROUTES } from '../constants/routes';
 import { EXPERIENCE_CATEGORIES } from '../constants/experienceCategories';
 import Navigation from '../components/layout/Navigation';
+import Footer from '../components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'AMONG — You are not alone in this',
@@ -233,30 +234,8 @@ export default function LandingPage() {
           </section>
         </main>
 
-        {/* ── Footer tagline ─────────────────────────────────────────────── */}
-        <footer
-          aria-label="Site footer"
-          className="border-t border-[var(--color-border)] py-8 px-5 md:px-8"
-        >
-          <div className="max-w-shell mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <p className="text-caption text-[var(--color-text-muted)] font-[var(--font-ui)] max-w-[36ch]">
-              A human-experience network built around anonymity, relatability, and meaningful connection.
-            </p>
-            <nav
-              aria-label="Footer navigation"
-              className="flex flex-wrap gap-x-5 gap-y-2"
-            >
-              <Link href={ROUTES.EXPLORE}    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors">Explore</Link>
-              <Link href={ROUTES.ABOUT}      className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors">About</Link>
-              <Link href={ROUTES.GUIDELINES} className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors">Guidelines</Link>
-              <Link href={ROUTES.HELP}       className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors">Help</Link>
-              <Link href={ROUTES.SITEMAP}    className="text-caption text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors">Sitemap</Link>
-            </nav>
-          </div>
-          <p className="mt-4 px-0 text-caption text-[var(--color-text-muted)]/60 font-[var(--font-ui)] max-w-shell">
-            © {new Date().getFullYear()} AMONG. All rights reserved.
-          </p>
-        </footer>
+        {/* ── Primary footer — shared Letter / Typesetter (docs/theme.md §7) ── */}
+        <Footer />
       </div>
     </>
   );

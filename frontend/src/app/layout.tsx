@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Karla, Fraunces } from 'next/font/google';
+import { Karla, Fraunces, Comfortaa } from 'next/font/google';
 import ReduxProvider from '../components/providers/ReduxProvider';
 import SkipToMain from '../components/layout/SkipToMain';
 import './globals.css';
@@ -14,13 +14,19 @@ const fontUI = Karla({
   weight: ['400', '500', '600', '700'],
 });
 
-// Editorial font — literary serif for hero text, post body, headings
 const fontEditorial = Fraunces({
   subsets: ['latin'],
   variable: '--font-editorial',
   display: 'swap',
   style: ['normal', 'italic'],
   weight: ['400', '500', '600'],
+});
+
+const fontBrand = Comfortaa({
+  subsets: ['latin'],
+  variable: '--font-brand',
+  display: 'swap',
+  weight: ['500', '600'],
 });
 
 // ─── Default Metadata ────────────────────────────────────────────────────────
@@ -100,7 +106,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fontUI.variable} ${fontEditorial.variable}`}
+      className={`${fontUI.variable} ${fontEditorial.variable} ${fontBrand.variable}`}
     >
       <body>
         {/*
